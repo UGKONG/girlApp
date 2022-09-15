@@ -3,10 +3,11 @@ import create from 'zustand';
 import type {Store} from './types';
 
 export const store = create<Store>(set => ({
+  setting: {lang: 'en', color: '#8ba7c0'},
   isModal: null,
   isLogin: null,
   activeScreen: null,
-  setState: (type: 'isLogin' | 'activeScreen', payload: any) =>
+  setState: (type: string, payload: any) =>
     set((state: {[key: string]: any}) => {
       if (!type) {
         return console.warn('type is not found!!');

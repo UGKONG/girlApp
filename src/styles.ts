@@ -1,6 +1,9 @@
 import styled from 'styled-components/native';
 
-export const mainColor: string = '#a5bed5';
+/**
+ * #8ba7c0
+ * #b85c32
+ */
 
 export const Container = {
   View: styled.SafeAreaView`
@@ -14,12 +17,13 @@ export const Container = {
     padding: 10px;
   `,
 };
+type ButtonProps = {color?: string; none?: boolean};
 export const Button = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.7,
 }))`
   width: 100%;
-  background-color: ${mainColor};
-  opacity: ${(x: {none?: boolean | undefined}) => (x?.none ? 0.4 : 1)};
+  background-color: ${(x: ButtonProps) => x?.color ?? '#8ba7c0'};
+  opacity: ${(x: ButtonProps) => (x?.none ? 0.4 : 1)};
   padding: 12px;
   margin-bottom: 20px;
   border-radius: 6px;

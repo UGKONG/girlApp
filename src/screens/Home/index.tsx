@@ -1,29 +1,29 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-native/no-inline-styles */
 import React, {useRef, useState} from 'react';
 import {Text} from 'react-native';
 import styled from 'styled-components/native';
 import {RadioButton} from 'react-native-paper';
-import {Button, ButtonText, Container, mainColor} from '../../styles';
+import {DurationList, StrengthList, Duration, Strength} from '../../types';
+import {Button, ButtonText, Container} from '../../styles';
+import text from '../../text.json';
+import {store} from '../../functions';
 
 export default function 홈() {
-  type DurationList = ['5', '10', '15', '20'];
+  const {setting} = store(x => x);
   const durationList = useRef<DurationList>(['5', '10', '15', '20']);
-  type StrengthList = ['1', '2', '3', '4'];
   const strengthList = useRef<StrengthList>(['1', '2', '3', '4']);
-
-  type Duration = null | '5' | '10' | '15' | '20';
   const [duration, setDuration] = useState<Duration>(null);
-  type Strength = null | '1' | '2' | '3' | '4';
   const [strength, setStrength] = useState<Strength>(null);
 
   return (
     <Container.Scroll>
       <Row.Container>
-        <Row.Title>Duration</Row.Title>
+        <Row.Title>{text.duration[setting.lang]}</Row.Title>
         <Row.Contents>
           {durationList.current.map(item => (
             <RadioContainer key={item}>
               <Radio
+                color={setting.color}
                 value={item}
                 status={duration === item ? 'checked' : 'unchecked'}
                 onPress={() => setDuration(item)}
@@ -35,11 +35,12 @@ export default function 홈() {
       </Row.Container>
 
       <Row.Container>
-        <Row.Title>Strength</Row.Title>
+        <Row.Title>{text.strength[setting.lang]}</Row.Title>
         <Row.Contents>
           {strengthList.current.map(item => (
             <RadioContainer key={item}>
               <Radio
+                color={setting.color}
                 value={item}
                 status={strength === item ? 'checked' : 'unchecked'}
                 onPress={() => setStrength(item)}
@@ -51,18 +52,18 @@ export default function 홈() {
       </Row.Container>
 
       <Row.Container>
-        <Row.Title>Battery</Row.Title>
+        <Row.Title>{text.battery[setting.lang]}</Row.Title>
         <Row.Contents>
-          <BatteryProgress />
+          <BatteryProgress color={setting.color} />
         </Row.Contents>
       </Row.Container>
 
       <Row.Container style={{marginTop: 30}}>
-        <Button>
-          <ButtonText>Pause LUNA</ButtonText>
+        <Button color={setting.color}>
+          <ButtonText>{text.pause[setting.lang]}</ButtonText>
         </Button>
-        <Button>
-          <ButtonText>Good to go</ButtonText>
+        <Button color={setting.color}>
+          <ButtonText>{text.start[setting.lang]}</ButtonText>
         </Button>
       </Row.Container>
     </Container.Scroll>
@@ -94,12 +95,11 @@ const RadioContainer = styled.View`
   padding-right: 10px;
 `;
 const Radio = styled(RadioButton).attrs(() => ({
-  color: mainColor,
   uncheckedColor: '#ddd',
 }))`
   width: 25%;
 `;
 const BatteryProgress = styled.View`
   width: 30%;
-  background-color: ${mainColor};
+  background-color: ${(x: {color?: string}) => x?.color};
 `;

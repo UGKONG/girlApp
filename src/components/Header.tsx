@@ -3,9 +3,10 @@ import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {store} from '../functions';
 import logoImage from '../../assets/images/logo.png';
+import text from '../text.json';
 
 export default function 해더() {
-  const {isLogin, setState: dispatch} = store(x => x);
+  const {isLogin, setState: dispatch, setting} = store(x => x);
 
   const login = () => {
     const LoginScreen = require('../screens/Login').default;
@@ -21,7 +22,7 @@ export default function 해더() {
     <Container>
       <Logo />
       <UserCircle onPress={isLogin ? logout : login}>
-        {!isLogin && <LoginText>LOGIN</LoginText>}
+        {!isLogin && <LoginText>{text.login[setting.lang]}</LoginText>}
         <Icon name="ios-person-circle" color="#ccc" size={40} />
       </UserCircle>
     </Container>

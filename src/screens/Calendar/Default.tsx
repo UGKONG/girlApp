@@ -1,18 +1,26 @@
 import React from 'react';
 import {Text} from 'react-native';
 import styled from 'styled-components/native';
+import {store} from '../../functions';
+import text from '../../text.json';
 import {Button, ButtonText, Container} from '../../styles';
 
 export default function 기본({navigation}: any) {
+  const {setting} = store(x => x);
+
   return (
     <Container.View>
       <Calendar>
-        <Text>캘린더</Text>
+        <Text>{text.calendar[setting.lang]}</Text>
       </Calendar>
-      <Button onPress={() => navigation.push('DayScreen')}>
+      <Button
+        color={setting.color}
+        onPress={() => navigation.push('DayScreen')}>
         <ButtonText>개별 날짜 클릭 시</ButtonText>
       </Button>
-      <Button onPress={() => navigation.push('MonthScreen')}>
+      <Button
+        color={setting.color}
+        onPress={() => navigation.push('MonthScreen')}>
         <ButtonText>Analysis 클릭 시</ButtonText>
       </Button>
     </Container.View>
