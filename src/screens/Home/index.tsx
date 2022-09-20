@@ -1,15 +1,12 @@
-/* eslint-disable react-native/no-inline-styles */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, {useRef, useState} from 'react';
-import {Text} from 'react-native';
 import styled from 'styled-components/native';
-import {RadioButton} from 'react-native-paper';
 import {DurationList, StrengthList, Duration, Strength} from '../../types';
-import {Button, ButtonText, Container} from '../../styles';
-import text from '../../text.json';
 import {store} from '../../functions';
+import Button from '../../components/Button';
+import Container from '../../components/Container';
 
 export default function 홈() {
-  const {setting} = store(x => x);
   const durationList = useRef<DurationList>(['5', '10', '15', '20']);
   const strengthList = useRef<StrengthList>(['1', '2', '3', '4']);
   const [duration, setDuration] = useState<Duration>(null);
@@ -17,89 +14,46 @@ export default function 홈() {
 
   return (
     <Container.Scroll>
-      <Row.Container>
-        <Row.Title>{text.duration[setting.lang]}</Row.Title>
-        <Row.Contents>
-          {durationList.current.map(item => (
-            <RadioContainer key={item}>
-              <Radio
-                color={setting.color}
-                value={item}
-                status={duration === item ? 'checked' : 'unchecked'}
-                onPress={() => setDuration(item)}
-              />
-              <Text>{item}</Text>
-            </RadioContainer>
-          ))}
-        </Row.Contents>
-      </Row.Container>
-
-      <Row.Container>
-        <Row.Title>{text.strength[setting.lang]}</Row.Title>
-        <Row.Contents>
-          {strengthList.current.map(item => (
-            <RadioContainer key={item}>
-              <Radio
-                color={setting.color}
-                value={item}
-                status={strength === item ? 'checked' : 'unchecked'}
-                onPress={() => setStrength(item)}
-              />
-              <Text>{item}</Text>
-            </RadioContainer>
-          ))}
-        </Row.Contents>
-      </Row.Container>
-
-      <Row.Container>
-        <Row.Title>{text.battery[setting.lang]}</Row.Title>
-        <Row.Contents>
-          <BatteryProgress color={setting.color} />
-        </Row.Contents>
-      </Row.Container>
-
-      <Row.Container style={{marginTop: 30}}>
-        <Button color={setting.color}>
-          <ButtonText>{text.pause[setting.lang]}</ButtonText>
-        </Button>
-        <Button color={setting.color}>
-          <ButtonText>{text.start[setting.lang]}</ButtonText>
-        </Button>
-      </Row.Container>
+      <SymbolContainer>
+        <SymbolImage />
+        <BtnWrap>
+          <MenuBtn>루나란..?</MenuBtn>
+          <MenuBtn>사용방법</MenuBtn>
+          <MenuBtn>SNS 둘러보기</MenuBtn>
+          <MenuBtn>LUNA days</MenuBtn>
+          <MenuBtn>dono.LUNA</MenuBtn>
+          <MenuBtn>사용로그</MenuBtn>
+        </BtnWrap>
+      </SymbolContainer>
     </Container.Scroll>
   );
 }
 
-const Row = {
-  Container: styled.View`
-    padding: 10px;
-    margin-bottom: 10px;
-  `,
-  Title: styled.Text`
-    font-size: 18px;
-    font-weight: 500;
-    margin-bottom: 6px;
-  `,
-  Contents: styled.View`
-    width: 100%;
-    height: 50px;
-    border: 1px solid #ddd;
-    flex-direction: row;
-  `,
-};
-const RadioContainer = styled.View`
-  width: 25%;
-  justify-content: center;
+const SymbolContainer = styled.View`
+  width: 100%;
+  height: 60%;
+  position: relative;
+  display: flex;
   align-items: center;
-  flex-direction: row;
-  padding-right: 10px;
+  justify-content: flex-start;
 `;
-const Radio = styled(RadioButton).attrs(() => ({
-  uncheckedColor: '#ddd',
+const SymbolImage = styled.Image.attrs(() => ({
+  source: require('../../../assets/images/mainSymbol.png'),
+  resizeMode: 'contain',
 }))`
-  width: 25%;
+  width: 40%;
+  margin-bottom: 20px;
 `;
-const BatteryProgress = styled.View`
-  width: 30%;
-  background-color: ${(x: {color?: string}) => x?.color};
+const BtnWrap = styled.View`
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+`;
+const MenuBtn = styled(Button)`
+  flex: 1;
+  min-width: 40%;
+  max-width: 50%;
+  margin: 5px;
+  background-color: #fadeee;
 `;

@@ -5,18 +5,11 @@ import type {Store} from './types';
 export const store = create<Store>(set => ({
   setting: {lang: 'en', color: '#8ba7c0'},
   isModal: null,
+  isMenu: false,
   isLogin: null,
-  activeScreen: null,
+  activeScreen: 'home',
   setState: (type: string, payload: any) =>
-    set((state: {[key: string]: any}) => {
-      if (!type) {
-        return console.warn('type is not found!!');
-      }
-      if (typeof type !== 'string') {
-        return console.warn('type is not string!!');
-      }
-      return (state[type] = payload);
-    }),
+    set((state: Store): Store => ({...state, [type]: payload})),
 }));
 
 export const stringToBytes = (str: string) => {

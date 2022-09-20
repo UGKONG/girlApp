@@ -3,7 +3,7 @@ import React from 'react';
 import {Text} from 'react-native';
 import styled from 'styled-components/native';
 import {store} from '../../../functions';
-import {Container} from '../../../styles';
+import Container from '../../../components/Container';
 import text from '../../../text.json';
 
 export default function 앱_설정() {

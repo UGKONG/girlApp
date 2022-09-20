@@ -12,7 +12,8 @@ import BluetoothSerial from 'react-native-bluetooth-serial-next';
 import ScanList from './ScanList';
 import {stringToBytes} from '../../../functions';
 import type {Device, ConnectedInfo} from '../../../types';
-import {Container, Button, ButtonText} from '../../../styles';
+import Container from '../../../components/Container';
+import Button from '../../../components/Button';
 
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
@@ -141,21 +142,13 @@ export default function 디바이스_설정() {
     <Container.View>
       <Title>React Native Bluetooth Test</Title>
       <SubTitle>블루투스: {state ? 'ON' : 'OFF'}</SubTitle>
-      <Button onPress={bluetoothOn}>
-        <ButtonText>ON</ButtonText>
-      </Button>
-      <Button onPress={bluetoothOff}>
-        <ButtonText>OFF</ButtonText>
-      </Button>
+      <Button onPress={bluetoothOn}>ON</Button>
+      <Button onPress={bluetoothOff}>OFF</Button>
       <Button disabled={isScan} none={isScan} onPress={startScan}>
-        <ButtonText>스캔{isScan ? '중' : ''}</ButtonText>
+        스캔{isScan ? '중' : ''}
       </Button>
-      <Button onPress={connectedCheck}>
-        <ButtonText>연결확인</ButtonText>
-      </Button>
-      <Button onPress={write}>
-        <ButtonText>데이터 전송</ButtonText>
-      </Button>
+      <Button onPress={connectedCheck}>연결확인</Button>
+      <Button onPress={write}>데이터 전송</Button>
 
       {isScan ? (
         <View>

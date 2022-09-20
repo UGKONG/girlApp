@@ -1,23 +1,15 @@
 import React from 'react';
-import {store} from '../../functions';
-import {Container, Button, ButtonText} from '../../styles';
-import text from '../../text.json';
+import Button from '../../components/Button';
+import Container from '../../components/Container';
+// import {store} from '../../functions';
 
 export default function 기본({navigation}: any) {
-  const {setting} = store(x => x);
+  // const setting = store(x => x?.setting);
 
   return (
     <Container.Scroll>
-      <Button
-        color={setting.color}
-        onPress={() => navigation.push('DeviceSettingScreen')}>
-        <ButtonText>{text.deviceSetting[setting.lang]}</ButtonText>
-      </Button>
-      <Button
-        color={setting.color}
-        onPress={() => navigation.push('ApplicationSettingScreen')}>
-        <ButtonText>{text.ApplicationSetting[setting.lang]}</ButtonText>
-      </Button>
+      <Button onPress={() => navigation.push('Device')}>장비 관리</Button>
+      <Button onPress={() => navigation.push('Application')}>앱 설정</Button>
     </Container.Scroll>
   );
 }

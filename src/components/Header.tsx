@@ -1,30 +1,32 @@
 import React from 'react';
+import {Alert} from 'react-native';
 import styled from 'styled-components/native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import logoImage from '../../assets/images/logo-black.png';
 import {store} from '../functions';
-import logoImage from '../../assets/images/logo.png';
-import text from '../text.json';
 
 export default function 해더() {
-  const {isLogin, setState: dispatch, setting} = store(x => x);
-
-  const login = () => {
-    const LoginScreen = require('../screens/Login').default;
-    dispatch('isModal', <LoginScreen />);
-  };
+  const dispatch = store(x => x?.setState);
 
   const logout = () => {
     dispatch('isLogin', null);
-    dispatch('isModal', null);
+    Alert.alert('로그아웃되었습니다.');
+  };
+
+  const menuOpen = () => {
+    dispatch('isMenu', true);
   };
 
   return (
     <Container>
+      <HeaderBtn onPress={menuOpen}>
+        <Ionicons name="ios-menu" color="#E39CB8" size={38} />
+      </HeaderBtn>
       <Logo />
-      <UserCircle onPress={isLogin ? logout : login}>
-        {!isLogin && <LoginText>{text.login[setting.lang]}</LoginText>}
-        <Icon name="ios-person-circle" color="#ccc" size={40} />
-      </UserCircle>
+      <HeaderBtn onPress={logout}>
+        <MaterialIcons name="logout" color="#E39CB8" size={30} />
+      </HeaderBtn>
     </Container>
   );
 }
@@ -36,19 +38,17 @@ const Container = styled.View`
   justify-content: space-between;
   align-items: center;
 `;
+const HeaderBtn = styled.TouchableOpacity`
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
 const Logo = styled.Image.attrs(() => ({
   source: logoImage,
   resizeMode: 'contain',
 }))`
   width: 100px;
   height: 44px;
-`;
-const UserCircle = styled.TouchableOpacity.attrs(() => ({
-  activeOpacity: 0.6,
-}))`
-  flex-direction: row;
-  align-items: center;
-`;
-const LoginText = styled.Text`
-  margin-right: 10px;
 `;

@@ -15,6 +15,7 @@ export type User = {
   USER_ID: number;
   USER_NAME: string;
   UESR_ACCOUNT: string;
+  PLATFORM: string;
 };
 export type Setting = {
   lang: 'en' | 'ko';
@@ -28,8 +29,9 @@ export type SetConnectedInfo = Dispatch<SetStateAction<ConnectedInfo>>;
 export type Store = {
   setting: Setting;
   isModal: null | ReactElement;
+  isMenu: boolean;
   isLogin: null | User;
-  activeScreen: null | string;
+  activeScreen: string;
   setState?: any;
 };
 export type DurationList = ['5', '10', '15', '20'];

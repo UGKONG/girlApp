@@ -1,94 +1,72 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable curly */
-import React, {useCallback, useRef, useState} from 'react';
+import React, {useCallback, useMemo} from 'react';
 import styled from 'styled-components/native';
 import {store} from '../../functions';
-import {LoginData} from '../../types';
-import {Container, Button, ButtonText} from '../../styles';
-import logoImage from '../../../assets/images/logo.png';
-import text from '../../text.json';
+import Container from '../../components/Container';
+import facebookIcon from '../../../assets/images/loginIcon/facebook.png';
+import naverIcon from '../../../assets/images/loginIcon/naver.png';
+import kakaoIcon from '../../../assets/images/loginIcon/kakao.png';
+import googleIcon from '../../../assets/images/loginIcon/google.png';
 
 export default function 로그인() {
-  const {setState: dispatch, setting} = store(x => x);
-  const idRef = useRef<HTMLInputElement>(null);
-  const pwRef = useRef<HTMLInputElement>(null);
-  const [data, setData] = useState<LoginData>({id: '', pw: ''});
+  const dispatch = store(x => x?.setState);
+  type SnsList = {id: string; img: string}[];
+  const snsList = useMemo<SnsList>(
+    () => [
+      {id: 'facebook', img: facebookIcon},
+      {id: 'naver', img: naverIcon},
+      {id: 'kakao', img: kakaoIcon},
+      {id: 'google', img: googleIcon},
+    ],
+    [],
+  );
 
-  const submit = useCallback(() => {
-    if (!dispatch) return;
-    dispatch('isLogin', {
-      USER_ID: 1,
-      USER_NAME: '테스트',
-      USER_ACCOUNT: data.id,
-    });
-    dispatch('isModal', null);
-  }, [data.id, dispatch]);
+  const submit = useCallback(
+    (platformName: string) => {
+      if (!dispatch) return;
+      console.log(platformName + ' Login');
 
-  const validate = useCallback(() => {
-    if (!data.id) return idRef.current?.focus();
-    if (!data.pw) return pwRef.current?.focus();
-
-    submit();
-  }, [data.id, data.pw, submit]);
+      dispatch('isLogin', {
+        USER_ID: 1,
+        USER_NAME: '테스트',
+        USER_ACCOUNT: 'test',
+        PLATFORM: platformName,
+      });
+      dispatch('isModal', null);
+    },
+    [dispatch],
+  );
 
   return (
-    <Container.Scroll style={{height: '100%'}}>
-      <Logo />
-
-      <Form>
-        <Input
-          color={setting.color}
-          placeholder={text.writeId[setting.lang]}
-          keyboardType="email-address"
-          ref={idRef}
-          value={data.id}
-          onChangeText={(val: string) => setData(prev => ({...prev, id: val}))}
-          onSubmitEditing={() => pwRef.current?.focus()}
-          autoFocus={true}
-        />
-        <Input
-          color={setting.color}
-          placeholder={text.writePw[setting.lang]}
-          ref={pwRef}
-          password={true}
-          textContentType="password"
-          multiline={false}
-          value={data.pw}
-          onChangeText={(val: string) => setData(prev => ({...prev, pw: val}))}
-          returnKeyType="go"
-          secureTextEntry={true}
-          onSubmitEditing={() => validate()}
-        />
-        <Submit color={setting.color} onPress={validate}>
-          <ButtonText>{text.login[setting.lang]}</ButtonText>
-        </Submit>
-      </Form>
-    </Container.Scroll>
+    <Container.View style={{backgroundColor: '#E39CB8'}}>
+      <IconWrap>
+        {snsList?.map(item => (
+          <Button key={item?.id} onPress={() => submit(item?.id)}>
+            <Icon img={item?.img} />
+          </Button>
+        ))}
+      </IconWrap>
+    </Container.View>
   );
 }
 
-const Logo = styled.Image.attrs(() => ({
-  source: logoImage,
-  resizeMode: 'contain',
-}))`
-  height: 100px;
-  margin: 30% auto 100px;
-`;
-const Form = styled.View`
+const IconWrap = styled.View`
+  flex-direction: row;
   width: 100%;
-  flex: 1;
-  padding: 10px 0;
+  justify-content: center;
 `;
-const Input = styled.TextInput.attrs(() => ({
-  maxLength: 30,
+const Button = styled.TouchableOpacity`
+  width: 60px;
+  height: 60px;
+  margin: 10px;
+  border-radius: 60px;
+  overflow: hidden;
+`;
+type IconProps = {img: string};
+const Icon = styled.Image.attrs((x: IconProps) => ({
+  source: x?.img,
 }))`
-  border: 1px solid ${(x: {color: string}) => x?.color ?? '#8ba7c0'}50;
-  margin-bottom: 10px;
-  border-radius: 6px;
-  padding-left: 10px;
-  padding-right: 10px;
-`;
-const Submit = styled(Button)`
-  margin-top: 50px;
-  background-color: ${(x: {color?: string}) => x?.color ?? '#8ba7c0'};
+  width: 100%;
+  height: 100%;
 `;
