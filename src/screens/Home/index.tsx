@@ -7,22 +7,35 @@ import Button from '../../components/Button';
 import Container from '../../components/Container';
 
 export default function 홈() {
+  const dispatch = store(x => x?.setState);
+  type MenuBtnList = {id: string; name: string};
+  const menuBtnList = useRef<MenuBtnList[]>([
+    {id: 'question', name: '루나?'},
+    {id: 'how', name: '사용방법'},
+    {id: 'sns', name: 'SNS 둘러보기'},
+    {id: 'days', name: 'LUNA days'},
+    {id: 'log', name: '사용로그'},
+    {id: 'setting', name: '설정'},
+  ]);
   const durationList = useRef<DurationList>(['5', '10', '15', '20']);
   const strengthList = useRef<StrengthList>(['1', '2', '3', '4']);
   const [duration, setDuration] = useState<Duration>(null);
   const [strength, setStrength] = useState<Strength>(null);
+
+  const menuBtnClick = (id: string) => {
+    dispatch('activeScreen', id);
+  };
 
   return (
     <Container.Scroll>
       <SymbolContainer>
         <SymbolImage />
         <BtnWrap>
-          <MenuBtn>루나란..?</MenuBtn>
-          <MenuBtn>사용방법</MenuBtn>
-          <MenuBtn>SNS 둘러보기</MenuBtn>
-          <MenuBtn>LUNA days</MenuBtn>
-          <MenuBtn>dono.LUNA</MenuBtn>
-          <MenuBtn>사용로그</MenuBtn>
+          {menuBtnList.current?.map(item => (
+            <MenuBtn key={item?.id} onPress={() => menuBtnClick(item?.id)}>
+              {item?.name}
+            </MenuBtn>
+          ))}
         </BtnWrap>
       </SymbolContainer>
     </Container.Scroll>

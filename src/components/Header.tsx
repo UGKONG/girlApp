@@ -23,7 +23,9 @@ export default function 해더() {
       <HeaderBtn onPress={menuOpen}>
         <Ionicons name="ios-menu" color="#E39CB8" size={38} />
       </HeaderBtn>
-      <Logo />
+      <LogoContainer onPress={() => dispatch('activeScreen', 'home')}>
+        <Logo />
+      </LogoContainer>
       <HeaderBtn onPress={logout}>
         <MaterialIcons name="logout" color="#E39CB8" size={30} />
       </HeaderBtn>
@@ -44,6 +46,10 @@ const HeaderBtn = styled.TouchableOpacity`
   display: flex;
   align-items: center;
   justify-content: center;
+`;
+const LogoContainer = styled.TouchableOpacity`
+  width: 100px;
+  height: 44px;
 `;
 const Logo = styled.Image.attrs(() => ({
   source: logoImage,
