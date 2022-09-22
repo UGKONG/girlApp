@@ -4,7 +4,7 @@ import {View, Text} from 'react-native';
 import styled from 'styled-components/native';
 import type {Peripheral} from 'react-native-ble-manager';
 import ScanItem from './ScanItem';
-import type {SetConnectedInfo} from '../../../types';
+import type {SetConnectedInfo} from '../../types';
 
 interface Props {
   list: Peripheral[];

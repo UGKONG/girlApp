@@ -1,75 +1,84 @@
 /* eslint-disable curly */
 import React, {useEffect} from 'react';
+import {Platform, StatusBar, BackHandler, Alert} from 'react-native';
+import {
+  NavigationContainer,
+  useNavigationContainerRef,
+} from '@react-navigation/native';
 import {request, PERMISSIONS} from 'react-native-permissions';
 import styled from 'styled-components/native';
-import {Platform, StatusBar} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {store} from './functions';
-import Header from './components/Header';
-import ScrollMenu from './components/ScrollMenu';
-import Background from './components/BackgroundWater';
+import MyNavigator from './Navigator';
+import SideMenu from './components/SideMenu';
 import LoginScreen from './screens/Login';
-import HomeScreen from './screens/Home';
-import HowScreen from './screens/How';
-import HelpScreen from './screens/Help';
-import SnsScreen from './screens/Sns';
-import QuestionScreen from './screens/Question';
-import LogScreen from './screens/Log';
-import DaysScreen from './screens/Days';
-import SettingScreen from './screens/Setting';
 
 const os = Platform.OS;
 
 export default function App() {
-  const {isLogin, isModal, setState: dispatch, activeScreen} = store(x => x);
+  const navigationRef = useNavigationContainerRef();
+  const isModal = store<boolean>(x => x?.isModal);
+  const dispatch = store(x => x?.setState);
 
   // 안드로이드 위치 권한 요청
-  const androidLocationRequest = (fn: any) => {
+  const androidLocationRequest = (fn: any): void => {
     request(PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION).then(x => {
       if (x === 'denied') fn();
     });
   };
 
   // IOS 위치 권한 요청
-  const iosLocationRequest = (fn: any) => {
+  const iosLocationRequest = (fn: any): void => {
     request(PERMISSIONS.IOS.LOCATION_ALWAYS).then(x => {
       if (x === 'denied') fn();
     });
   };
 
   // 권한 요청
-  useEffect(() => {
+  useEffect((): void => {
     if (os === 'android') androidLocationRequest(androidLocationRequest);
     if (os === 'ios') iosLocationRequest(iosLocationRequest);
   }, []);
 
+  // 안드로이드 뒤로가기 버튼 클릭
+  useEffect(() => {
+    const backBtnClick = (): boolean => {
+      const rootState = navigationRef?.getRootState();
+      const name = rootState?.routes[rootState?.routes?.length - 1]?.name;
+
+      if (name === 'home') {
+        Alert.alert('NUNA', '앱을 종료하시겠습니까?', [
+          {text: '확인', onPress: () => BackHandler.exitApp()},
+          {text: '취소', onPress: () => null},
+        ]);
+        return true;
+      } else {
+        return false;
+      }
+    };
+
+    BackHandler.addEventListener('hardwareBackPress', backBtnClick);
+
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', backBtnClick);
+    };
+  }, [navigationRef]);
+
   return (
-    <>
+    <NavigationContainer ref={navigationRef}>
       <StatusBar barStyle="light-content" />
-      {isLogin ? (
+
+      <MyNavigator />
+
+      <Modal visible={isModal}>
+        <CloseBtn onPress={() => dispatch('isModal', false)}>
+          <CloseIcon />
+        </CloseBtn>
         <LoginScreen />
-      ) : (
-        <>
-          <Header />
-          <Background />
-          {activeScreen === 'home' && <HomeScreen />}
-          {activeScreen === 'question' && <QuestionScreen />}
-          {activeScreen === 'how' && <HowScreen />}
-          {activeScreen === 'help' && <HelpScreen />}
-          {activeScreen === 'sns' && <SnsScreen />}
-          {activeScreen === 'log' && <LogScreen />}
-          {activeScreen === 'days' && <DaysScreen />}
-          {activeScreen === 'setting' && <SettingScreen />}
-          <Modal visible={isModal ? true : false}>
-            <CloseBtn onPress={() => dispatch('isModal', null)}>
-              <CloseIcon />
-            </CloseBtn>
-            {isModal}
-          </Modal>
-        </>
-      )}
-      <ScrollMenu />
-    </>
+      </Modal>
+
+      <SideMenu navigationRef={navigationRef} />
+    </NavigationContainer>
   );
 }
 

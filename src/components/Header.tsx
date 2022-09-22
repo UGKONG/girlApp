@@ -6,12 +6,18 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import logoImage from '../../assets/images/logo-black.png';
 import {store} from '../functions';
 
-export default function 해더() {
+type Props = {navigation: any};
+export default function 해더({navigation}: Props) {
   const dispatch = store(x => x?.setState);
+  const isLogin = store(x => x?.isLogin);
 
   const logout = () => {
     dispatch('isLogin', null);
     Alert.alert('로그아웃되었습니다.');
+  };
+
+  const login = () => {
+    dispatch('isModal', true);
   };
 
   const menuOpen = () => {
@@ -23,11 +29,15 @@ export default function 해더() {
       <HeaderBtn onPress={menuOpen}>
         <Ionicons name="ios-menu" color="#E39CB8" size={38} />
       </HeaderBtn>
-      <LogoContainer onPress={() => dispatch('activeScreen', 'home')}>
+      <LogoContainer onPress={() => navigation.navigate('home')}>
         <Logo />
       </LogoContainer>
-      <HeaderBtn onPress={logout}>
-        <MaterialIcons name="logout" color="#E39CB8" size={30} />
+      <HeaderBtn onPress={isLogin ? logout : login}>
+        <MaterialIcons
+          name={isLogin ? 'logout' : 'login'}
+          color="#E39CB8"
+          size={30}
+        />
       </HeaderBtn>
     </Container>
   );
@@ -39,6 +49,7 @@ const Container = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  background-color: #fff;
 `;
 const HeaderBtn = styled.TouchableOpacity`
   width: 40px;

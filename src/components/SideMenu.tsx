@@ -1,34 +1,42 @@
-import React, {useRef} from 'react';
+import React, {useCallback, useEffect, useRef} from 'react';
+import {NavigationContainerRefWithCurrent} from '@react-navigation/native';
 import styled from 'styled-components/native';
 import {store} from '../functions';
 
-export default function 스크롤메뉴() {
+type Props = {
+  navigationRef: NavigationContainerRefWithCurrent<ReactNavigation.RootParamList>;
+};
+export default function 사이드메뉴({navigationRef}: Props) {
   const dispatch = store(x => x?.setState);
   const isMenu = store(x => x?.isMenu);
   type MenuList = {id: string; name: string}[];
   const menuList = useRef<MenuList>([
+    {id: 'home', name: 'dono.LUNA 시작'},
     {id: 'question', name: '루나?'},
     {id: 'how', name: '사용방법'},
     {id: 'sns', name: 'SNS 둘러보기'},
     {id: 'days', name: 'LUNA days'},
     {id: 'log', name: '사용 로그'},
-    {id: 'home', name: 'dono.LUNA 시작'},
     {id: 'help', name: '도움말'},
     {id: 'setting', name: '설정'},
   ]);
 
-  const close = () => {
+  const onAnimate = useCallback((): void => {}, []);
+
+  const offAnimate = useCallback((): void => {}, []);
+
+  const onPress = (id: string): void => {
+    navigationRef.navigate(id as never);
     dispatch('isMenu', false);
   };
 
-  const onPress = (id: string) => {
-    dispatch('activeScreen', id);
-    close();
-  };
+  useEffect(() => {
+    (isMenu ? onAnimate : offAnimate)();
+  }, [isMenu, onAnimate, offAnimate]);
 
   return (
     <>
-      {isMenu && <Background onPress={close} />}
+      {isMenu && <Background onPress={() => dispatch('isMenu', false)} />}
       <Container isMenu={isMenu}>
         <Description>
           공지 : 생리통에 좋은 음식 뿐만 아니라 다양한 정보를 dono.LUNA 공식

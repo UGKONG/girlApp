@@ -1,72 +1,185 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React, {useRef, useState} from 'react';
+import React, {useMemo, useRef, useState} from 'react';
 import styled from 'styled-components/native';
-import {DurationList, StrengthList, Duration, Strength} from '../../types';
-import {store} from '../../functions';
-import Button from '../../components/Button';
 import Container from '../../components/Container';
+import Slider from '../../components/Slider';
+import {Alert} from 'react-native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {ParamListBase} from '@react-navigation/native';
+import SymbolMenu from './SymbolMenu';
+import {store} from '../../functions';
 
-export default function 홈() {
-  const dispatch = store(x => x?.setState);
-  type MenuBtnList = {id: string; name: string};
-  const menuBtnList = useRef<MenuBtnList[]>([
-    {id: 'question', name: '루나?'},
-    {id: 'how', name: '사용방법'},
-    {id: 'sns', name: 'SNS 둘러보기'},
-    {id: 'days', name: 'LUNA days'},
-    {id: 'log', name: '사용로그'},
-    {id: 'setting', name: '설정'},
-  ]);
-  const durationList = useRef<DurationList>(['5', '10', '15', '20']);
-  const strengthList = useRef<StrengthList>(['1', '2', '3', '4']);
-  const [duration, setDuration] = useState<Duration>(null);
-  const [strength, setStrength] = useState<Strength>(null);
+type Props = {
+  navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
+};
+export default function 홈({navigation}: Props) {
+  const isLogin = store(x => x?.isLogin);
+  const strengthList = useRef<number[]>([1, 2, 3, 4, 5]);
+  const durationList = useRef<number[]>([5, 10, 15, 20, 25]);
+  const [strength, setStrength] = useState<number>(strengthList?.current[1]);
+  const [duration, setDuration] = useState<number>(durationList?.current[2]);
+  const remoteList = useMemo(
+    () => [
+      {
+        name: '에너지',
+        list: strengthList?.current,
+        color: '#e46b8b',
+        value: strength,
+        setValue: setStrength,
+      },
+      {
+        name: '타이머 (분)',
+        list: durationList?.current,
+        color: '#e46b8b',
+        value: duration,
+        setValue: setDuration,
+      },
+    ],
+    [duration, strength],
+  );
 
-  const menuBtnClick = (id: string) => {
-    dispatch('activeScreen', id);
+  // 리스트 Step, Min, Max
+  const listStep = (list: number[]): number => list[1] - list[0];
+  const listFirst = (list: number[]): number => list[0];
+  const listLast = (list: number[]): number => list[list?.length - 1];
+
+  // 루나 시작
+  const startLuna = (): void => {
+    const str: string = `에너지: ${strength}단계, 타이머: ${duration}분`;
+    Alert.alert(str);
+  };
+
+  // 루나 정지
+  const stopLuna = (): void => {
+    const str: string = '정지되었습니다.';
+    Alert.alert(str);
   };
 
   return (
-    <Container.Scroll>
-      <SymbolContainer>
-        <SymbolImage />
-        <BtnWrap>
-          {menuBtnList.current?.map(item => (
-            <MenuBtn key={item?.id} onPress={() => menuBtnClick(item?.id)}>
-              {item?.name}
-            </MenuBtn>
-          ))}
-        </BtnWrap>
-      </SymbolContainer>
-    </Container.Scroll>
+    <Container.View>
+      <SymbolMenu navigation={navigation} />
+      <RemoteContainer>
+        {remoteList?.map(item => (
+          <Row key={item?.name}>
+            <RowTitle>{item?.name}</RowTitle>
+            <SliderContainer>
+              <SliderTextWrap>
+                {item?.list?.map((txt, i) => (
+                  <SliderText
+                    onPress={() => item?.setValue(txt)}
+                    key={item?.name + txt}
+                    count={item?.list?.length}
+                    idx={i}
+                    active={Number(txt) === item?.value}
+                    ismargin={txt >= 10}>
+                    {txt}
+                  </SliderText>
+                ))}
+              </SliderTextWrap>
+              <Slider
+                step={listStep(item?.list)}
+                min={listFirst(item?.list)}
+                max={listLast(item?.list)}
+                color={item?.color}
+                value={item?.value}
+                setValue={item?.setValue}
+              />
+            </SliderContainer>
+          </Row>
+        ))}
+        <Row>
+          {isLogin ? (
+            <>
+              <SubmitBtn onPress={startLuna}>
+                <SubmitBtnText>루나 시작</SubmitBtnText>
+              </SubmitBtn>
+              <SubmitBtn onPress={stopLuna}>
+                <SubmitBtnText>정지</SubmitBtnText>
+              </SubmitBtn>
+            </>
+          ) : (
+            <LoginDescription>
+              로그인을 해야 사용이 가능합니다.
+            </LoginDescription>
+          )}
+        </Row>
+      </RemoteContainer>
+    </Container.View>
   );
 }
 
-const SymbolContainer = styled.View`
+const RemoteContainer = styled.View`
   width: 100%;
-  height: 60%;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-`;
-const SymbolImage = styled.Image.attrs(() => ({
-  source: require('../../../assets/images/mainSymbol.png'),
-  resizeMode: 'contain',
-}))`
-  width: 40%;
-  margin-bottom: 20px;
-`;
-const BtnWrap = styled.View`
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  align-items: flex-start;
-`;
-const MenuBtn = styled(Button)`
   flex: 1;
-  min-width: 40%;
-  max-width: 50%;
-  margin: 5px;
-  background-color: #fadeee;
+  justify-content: space-around;
+`;
+const Row = styled.View`
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0 20px;
+`;
+const RowTitle = styled.Text`
+  width: 100px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #e7839c;
+  /* text-shadow: 0 0 5px #df5e90; */
+  margin-right: 10px;
+`;
+const SliderContainer = styled.View`
+  position: relative;
+  flex: 1;
+`;
+const SliderTextWrap = styled.View`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  padding: 0 11px;
+  width: 100%;
+  height: 24px;
+  flex-direction: row;
+  justify-content: space-between;
+`;
+type SlideTextProps = {
+  count: number;
+  idx: number;
+  active: boolean;
+  ismargin: boolean;
+};
+const SliderText = styled.Text`
+  color: ${(x: SlideTextProps) => (x?.active ? '#e46b8b' : '#e7839c')};
+  font-weight: ${(x: SlideTextProps) => (x?.active ? 700 : 400)};
+  transform: translateX(
+    ${(x: SlideTextProps) => (x?.ismargin ? '4px' : '0px')}
+  );
+`;
+export const SubmitBtn = styled.TouchableOpacity`
+  width: 70px;
+  height: 70px;
+  border-radius: 20px;
+  border: 3px solid #fff;
+  padding-left: 10px;
+  padding-right: 8px;
+  justify-content: center;
+  align-items: center;
+  background-color: #fce7eb;
+  margin: 0 60px;
+`;
+export const SubmitBtnText = styled.Text`
+  color: #e87ea7;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 22px;
+  letter-spacing: 1px;
+`;
+const LoginDescription = styled.Text`
+  height: 70px;
+  flex-direction: row;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 700;
+  /* color: #e87ea7; */
+  color: #ffffff;
+  padding: 20px 0;
 `;

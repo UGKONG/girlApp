@@ -6,20 +6,44 @@ const Scroll = (props: any) => {
 };
 
 const View = (props: any) => {
-  return <ViewContainer {...props}>{props?.children}</ViewContainer>;
+  return (
+    <ViewContainer {...props}>
+      <Background />
+      <Contents>{props?.children}</Contents>
+    </ViewContainer>
+  );
 };
 
-const ScrollContainer = styled.SafeAreaView`
+const ScrollContainer = styled.ScrollView`
   padding: 10px;
   width: 100%;
+  position: relative;
+`;
+const ViewContainer = styled.SafeAreaView`
+  position: relative;
+  width: 100%;
   height: 100%;
+  background-color: #fff;
+`;
+const Contents = styled.View`
+  width: 100%;
+  height: 100%;
+  padding: 10px;
   align-items: center;
   justify-content: flex-start;
   position: relative;
 `;
-const ViewContainer = styled.ScrollView`
-  padding: 10px;
-  position: relative;
+const Background = styled.Image.attrs(() => ({
+  source: require('../../assets/images/backgroundWater2.png'),
+  resizeMode: 'cover',
+}))`
+  width: 100%;
+  height: 35%;
+  transform: scale(1);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
 `;
 
 export default {Scroll, View};
