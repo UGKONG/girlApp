@@ -1,5 +1,13 @@
+/* eslint-disable no-shadow */
+/* eslint-disable curly */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, {Dispatch, SetStateAction, useMemo} from 'react';
+import React, {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+} from 'react';
 import {Alert, Text, TouchableOpacity} from 'react-native';
 import styled from 'styled-components/native';
 import BleManager from 'react-native-ble-manager';
@@ -15,18 +23,47 @@ export default function 스캔된장비_아이템({
   connectedDevice,
   setConnectedDevice,
 }: Props) {
+  // 장비 클릭
   const onClick = () => {
     BleManager.connect(data?.id)
       .then(() => {
         console.log(data);
-        setConnectedDevice({id: data?.id, detail: null});
-        Alert.alert('연결되었습니다.');
+        setConnectedDevice(data ?? null);
+        // sendData();
       })
       .catch(() => {
         setConnectedDevice(null);
         Alert.alert('연결에 실패하였습니다.');
       });
   };
+
+  // 데이터 수신
+  const getData = useCallback(() => {
+    if (!connectedDevice) return console.log('connectedDevice is null!!');
+
+    BleManager.startNotification(connectedDevice?.id, 'fe60', 'FE62')
+      .then(data => {
+        console.log('Notification started', data);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }, [connectedDevice]);
+
+  // 데이터 송신
+  const sendData = useCallback(() => {
+    if (!connectedDevice) return console.log('connectedDevice is null!!');
+    const data = 0x40;
+
+    BleManager.write(connectedDevice?.id, 'fe60', 'FE61', data)
+      .then(() => {
+        console.log('send success');
+        getData();
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }, [connectedDevice, getData]);
 
   // 연결 확인 & 연결 기기 서비스 및 특성 검색
   const connectedCheck = () => {
@@ -49,10 +86,8 @@ export default function 스캔된장비_아이템({
   };
 
   const title = useMemo(() => {
-    let result = data?.id;
-    if (data?.name) {
-      result += ` (${data?.name})`;
-    }
+    let result = data?.name;
+    if (result) result += ` (${data?.id})`;
     return result;
   }, [data?.id, data?.name]);
 

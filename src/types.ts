@@ -4,10 +4,7 @@ import type {Peripheral, PeripheralInfo} from 'react-native-ble-manager';
 declare module '*.png';
 
 export type Device = Peripheral;
-export type ConnectedDevice = null | {
-  id: string;
-  detail: null | PeripheralInfo;
-};
+export type ConnectedDevice = null | PeripheralInfo;
 export type User = {
   USER_ID: number;
   USER_NAME: string;
@@ -30,4 +27,22 @@ export type DayObject = {
   year: number;
   month: number;
   day: number;
+};
+
+let a = {
+  advertising: {
+    isConnectable: true,
+    localName: 'DoNoLUNA-0228',
+    manufacturerData: {
+      CDVType: 'ArrayBuffer',
+      bytes: [Array],
+      data: 'AgEGAwNg/g4JRG9Ob0xVTkEtMDIyOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
+    },
+    serviceData: {},
+    serviceUUIDs: ['fe60'],
+    txPowerLevel: -2147483648,
+  },
+  id: 'FA:19:8C:63:46:9A',
+  name: 'DoNoLUNA-0228',
+  rssi: -61,
 };

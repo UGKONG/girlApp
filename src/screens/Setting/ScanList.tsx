@@ -41,7 +41,7 @@ export default function 검색된장비_리스트({
     scanList.current = [];
     setList([]);
 
-    BleManager.scan([], 3, true).then(() => {
+    BleManager.scan([], 5, true).then(() => {
       setIsScan(true);
       BleManager.getDiscoveredPeripherals();
     });
@@ -51,19 +51,22 @@ export default function 검색된장비_리스트({
   const scanListClean = useCallback((): void => {
     const cleanList: Device[] = [...new Set(scanList.current)];
     let result: Device[] = [];
-
-    possibleDeviceList.forEach(id => {
-      let find = cleanList?.find(x => x?.id === id);
+    console.log(
+      'original-list',
+      cleanList?.map(x => x?.name),
+    );
+    possibleDeviceList.forEach(name => {
+      let find = cleanList?.find(x => x?.name === name);
       if (find) result.push(find);
     });
     setList(result);
   }, [possibleDeviceList]);
 
   const scanning = (data: Device): void => {
-    let find = scanList.current.find(x => x?.id === data.id);
-    if (!find) {
-      scanList.current.push(data);
-    }
+    let find: Device | undefined = scanList.current.find(
+      x => x?.id === data.id,
+    );
+    if (!find && data?.name) scanList.current.push(data);
   };
 
   const stopScan = useCallback((): void => {
@@ -74,11 +77,12 @@ export default function 검색된장비_리스트({
   useEffect(() => {
     bleManagerEmitter.addListener('BleManagerDiscoverPeripheral', scanning);
     bleManagerEmitter.addListener('BleManagerStopScan', stopScan);
+    startScan();
     return () => {
       bleManagerEmitter.removeAllListeners('BleManagerDiscoverPeripheral');
       bleManagerEmitter.removeAllListeners('BleManagerStopScan');
     };
-  }, [stopScan]);
+  }, [startScan, stopScan]);
 
   return (
     <Container>
