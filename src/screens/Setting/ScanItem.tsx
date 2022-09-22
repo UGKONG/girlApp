@@ -1,14 +1,9 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable no-shadow */
 /* eslint-disable curly */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-} from 'react';
-import {Alert, Text, TouchableOpacity} from 'react-native';
+import React, {Dispatch, SetStateAction, useCallback, useMemo} from 'react';
+import {Alert} from 'react-native';
 import styled from 'styled-components/native';
 import BleManager from 'react-native-ble-manager';
 import type {ConnectedDevice, Device} from '../../types';
@@ -24,7 +19,7 @@ export default function 스캔된장비_아이템({
   setConnectedDevice,
 }: Props) {
   // 장비 클릭
-  const onClick = () => {
+  const onClick = (): void => {
     BleManager.connect(data?.id)
       .then(() => {
         console.log(data);
@@ -38,7 +33,7 @@ export default function 스캔된장비_아이템({
   };
 
   // 데이터 수신
-  const getData = useCallback(() => {
+  const getData = useCallback((): void => {
     if (!connectedDevice) return console.log('connectedDevice is null!!');
 
     BleManager.startNotification(connectedDevice?.id, 'fe60', 'FE62')
@@ -51,7 +46,7 @@ export default function 스캔된장비_아이템({
   }, [connectedDevice]);
 
   // 데이터 송신
-  const sendData = useCallback(() => {
+  const sendData = useCallback((): void => {
     if (!connectedDevice) return console.log('connectedDevice is null!!');
     const data = 0x40;
 
@@ -66,9 +61,10 @@ export default function 스캔된장비_아이템({
   }, [connectedDevice, getData]);
 
   // 연결 확인 & 연결 기기 서비스 및 특성 검색
-  const connectedCheck = () => {
+  const connectedCheck = (): void => {
     if (!connectedDevice) {
-      return Alert.alert('장비가 연결되어있지 않습니다.');
+      Alert.alert('장비가 연결되어있지 않습니다.');
+      return;
     }
 
     BleManager.isPeripheralConnected(connectedDevice?.id, []).then(
@@ -85,8 +81,8 @@ export default function 스캔된장비_아이템({
     );
   };
 
-  const title = useMemo(() => {
-    let result = data?.name;
+  const title = useMemo((): string => {
+    let result = data?.name ?? '';
     if (result) result += ` (${data?.id})`;
     return result;
   }, [data?.id, data?.name]);

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import React from 'react';
 import {Alert} from 'react-native';
 import styled from 'styled-components/native';
@@ -5,22 +6,29 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import logoImage from '../../assets/images/logo-black.png';
 import {store} from '../functions';
+import {User} from '../types';
+import Toast from 'react-native-toast-message';
 
 type Props = {navigation: any};
 export default function 해더({navigation}: Props) {
   const dispatch = store(x => x?.setState);
-  const isLogin = store(x => x?.isLogin);
+  const isLogin = store<null | User>(x => x?.isLogin);
 
-  const logout = () => {
+  const logout = (): void => {
     dispatch('isLogin', null);
-    Alert.alert('로그아웃되었습니다.');
+
+    Toast.show({
+      type: 'success',
+      text1: '로그아웃 되었습니다.',
+      text2: '다음에 다시 만나요~',
+    });
   };
 
-  const login = () => {
+  const login = (): void => {
     dispatch('isModal', true);
   };
 
-  const menuOpen = () => {
+  const menuOpen = (): void => {
     dispatch('isMenu', true);
   };
 

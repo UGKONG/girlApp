@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import type {Dispatch, SetStateAction} from 'react';
 import type {Peripheral, PeripheralInfo} from 'react-native-ble-manager';
 
@@ -27,22 +28,4 @@ export type DayObject = {
   year: number;
   month: number;
   day: number;
-};
-
-let a = {
-  advertising: {
-    isConnectable: true,
-    localName: 'DoNoLUNA-0228',
-    manufacturerData: {
-      CDVType: 'ArrayBuffer',
-      bytes: [Array],
-      data: 'AgEGAwNg/g4JRG9Ob0xVTkEtMDIyOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
-    },
-    serviceData: {},
-    serviceUUIDs: ['fe60'],
-    txPowerLevel: -2147483648,
-  },
-  id: 'FA:19:8C:63:46:9A',
-  name: 'DoNoLUNA-0228',
-  rssi: -61,
 };

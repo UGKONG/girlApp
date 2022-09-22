@@ -1,4 +1,8 @@
-import React, {useCallback, useEffect, useRef} from 'react';
+/* eslint-disable prettier/prettier */
+/* eslint-disable curly */
+/* eslint-disable prettier/prettier */
+import React, {useState, useMemo, useCallback, useEffect, useRef} from 'react';
+import {Animated, Easing} from 'react-native';
 import {NavigationContainerRefWithCurrent} from '@react-navigation/native';
 import styled from 'styled-components/native';
 import {store} from '../functions';
@@ -6,9 +10,9 @@ import {store} from '../functions';
 type Props = {
   navigationRef: NavigationContainerRefWithCurrent<ReactNavigation.RootParamList>;
 };
-export default function 사이드메뉴({navigationRef}: Props) {
+export default function 사이드메뉴({navigationRef}: Props): JSX.Element {
   const dispatch = store(x => x?.setState);
-  const isMenu = store(x => x?.isMenu);
+  const isMenu = store<boolean>(x => x?.isMenu);
   type MenuList = {id: string; name: string}[];
   const menuList = useRef<MenuList>([
     {id: 'home', name: 'dono.LUNA 시작'},
@@ -20,24 +24,49 @@ export default function 사이드메뉴({navigationRef}: Props) {
     {id: 'help', name: '도움말'},
     {id: 'setting', name: '설정'},
   ]);
+  const [isLocalMenu, setIsLocalMenu] = useState(isMenu);
+  const duration = useRef<number>(200);
+  const left = useRef(new Animated.Value(-250)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
 
-  const onAnimate = useCallback((): void => {}, []);
+  const animateOption = useMemo(
+    () => ({
+      duration: duration.current,
+      useNativeDriver: true,
+      easing: Easing.inOut(Easing.ease),
+    }),
+    [duration],
+  );
 
-  const offAnimate = useCallback((): void => {}, []);
+  const sideMenuToggle = useCallback(() => {
+    Animated.timing(left, {
+      toValue: isMenu ? 0 : -250,
+      ...animateOption,
+    }).start();
 
-  const onPress = (id: string): void => {
+    Animated.timing(opacity, {
+      toValue: isMenu ? 1 : 0,
+      ...animateOption,
+    }).start(() => {
+      setIsLocalMenu(isMenu);
+    });
+  }, [isMenu, left, opacity, animateOption]);
+
+  useEffect(() => {
+    sideMenuToggle();
+    if (isMenu) setIsLocalMenu(true);
+  }, [isMenu, sideMenuToggle]);
+
+  const menuClick = (id: string): void => {
     navigationRef.navigate(id as never);
     dispatch('isMenu', false);
   };
 
-  useEffect(() => {
-    (isMenu ? onAnimate : offAnimate)();
-  }, [isMenu, onAnimate, offAnimate]);
-
   return (
     <>
-      {isMenu && <Background onPress={() => dispatch('isMenu', false)} />}
-      <Container isMenu={isMenu}>
+      {isLocalMenu && <Background style={{opacity: opacity}} />}
+      {isMenu && <ClickBackground onPress={() => dispatch('isMenu', false)} />}
+      <Container style={{transform: [{translateX: left}]}}>
         <Description>
           공지 : 생리통에 좋은 음식 뿐만 아니라 다양한 정보를 dono.LUNA 공식
           블로그에 지속적으로 올리고 있습니다. 사용 방법 SNS 둘러보기를 활용해
@@ -45,7 +74,7 @@ export default function 사이드메뉴({navigationRef}: Props) {
         </Description>
         <Scroll>
           {menuList.current?.map(item => (
-            <Menu key={item?.id} onPress={() => onPress(item?.id)}>
+            <Menu key={item?.id} onPress={() => menuClick(item?.id)}>
               <MenuText>{item?.name}</MenuText>
             </Menu>
           ))}
@@ -55,7 +84,7 @@ export default function 사이드메뉴({navigationRef}: Props) {
   );
 }
 
-const Background = styled.TouchableOpacity.attrs(() => ({
+const Background = styled(Animated.View).attrs(() => ({
   activeOpacity: 1,
 }))`
   width: 100%;
@@ -65,17 +94,21 @@ const Background = styled.TouchableOpacity.attrs(() => ({
   top: 0;
   left: 0;
 `;
-type ContainerProps = {isMenu: boolean};
-const Container = styled.SafeAreaView`
-  position: absolute;
-  left: ${(x: ContainerProps) => (x?.isMenu ? '0%' : '-60%')};
-  top: 0;
-  width: 60%;
+const ClickBackground = styled.TouchableOpacity`
+  width: 100%;
   height: 100%;
-  background: #eeeeee;
+  position: absolute;
+  top: 0;
+  left: 0;
+`;
+const Container = styled(Animated.View)`
+  position: absolute;
+  top: 0;
+  width: 250px;
+  height: 100%;
+  background: #fef6ff;
   padding: 10px;
   z-index: 50;
-  transition: 0.4s;
 `;
 const Description = styled.Text`
   padding: 8px;

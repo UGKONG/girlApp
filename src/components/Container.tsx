@@ -1,11 +1,12 @@
+/* eslint-disable prettier/prettier */
 import React from 'react';
 import styled from 'styled-components/native';
 
-const Scroll = (props: any) => {
+const Scroll = (props: any): JSX.Element => {
   return <ScrollContainer {...props}>{props?.children}</ScrollContainer>;
 };
 
-const View = (props: any) => {
+const View = (props: any): JSX.Element => {
   return (
     <ViewContainer {...props}>
       <Background />
@@ -18,6 +19,7 @@ const ScrollContainer = styled.ScrollView`
   padding: 10px;
   width: 100%;
   position: relative;
+  background-color: #fff;
 `;
 const ViewContainer = styled.SafeAreaView`
   position: relative;

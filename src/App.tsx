@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable curly */
 import React, {useEffect} from 'react';
 import {Platform, StatusBar, BackHandler, Alert} from 'react-native';
@@ -9,9 +10,10 @@ import {request, PERMISSIONS} from 'react-native-permissions';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {store} from './functions';
-import MyNavigator from './Navigator';
+import MyNavigator from './navigator';
 import SideMenu from './components/SideMenu';
 import LoginScreen from './screens/Login';
+import Toast, {ToastConfigParams} from 'react-native-toast-message';
 
 const os = Platform.OS;
 
@@ -78,6 +80,7 @@ export default function App() {
       </Modal>
 
       <SideMenu navigationRef={navigationRef} />
+      <Toast />
     </NavigationContainer>
   );
 }

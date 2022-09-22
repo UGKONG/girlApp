@@ -1,3 +1,5 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable prettier/prettier */
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable curly */
 import React, {
@@ -8,11 +10,12 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import {Alert, NativeModules, NativeEventEmitter} from 'react-native';
+import {NativeModules, NativeEventEmitter} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import styled from 'styled-components/native';
 import BleManager from 'react-native-ble-manager';
 import {Container, Header, Title, List as _List} from './ConnectedList';
+import BluetoothSerial from 'react-native-bluetooth-serial-next';
 import {Device, ConnectedDevice} from '../../types';
 import ScanItem from './ScanItem';
 import {store} from '../../functions';
@@ -22,11 +25,13 @@ const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
 type Props = {
   state: boolean;
+  setState: Dispatch<SetStateAction<boolean>>;
   connectedDevice: ConnectedDevice;
   setConnectedDevice: Dispatch<SetStateAction<ConnectedDevice>>;
 };
 export default function 검색된장비_리스트({
   state,
+  setState,
   connectedDevice,
   setConnectedDevice,
 }: Props) {
@@ -35,9 +40,22 @@ export default function 검색된장비_리스트({
   const [isScan, setIsScan] = useState<boolean>(false);
   const [list, setList] = useState<Device[]>([]);
 
+  // 블루투스 켜기
+  const bluetoothOn = useCallback(
+    (callback: () => void): void => {
+      setState(true);
+      BluetoothSerial.enable().then(() => {
+        setState(true);
+        callback();
+      });
+    },
+    [setState],
+  );
+
   // 검색 시작
   const startScan = useCallback((): void => {
-    if (!state) return Alert.alert('블루투스를 켜주세요.');
+    if (!state) return bluetoothOn(startScan);
+
     scanList.current = [];
     setList([]);
 
@@ -45,20 +63,23 @@ export default function 검색된장비_리스트({
       setIsScan(true);
       BleManager.getDiscoveredPeripherals();
     });
-  }, [state]);
+  }, [bluetoothOn, state]);
 
   // 검색 리스트 정리
   const scanListClean = useCallback((): void => {
     const cleanList: Device[] = [...new Set(scanList.current)];
     let result: Device[] = [];
-    console.log(
-      'original-list',
-      cleanList?.map(x => x?.name),
-    );
+
+    // console.log(
+    //   'original-list',
+    //   cleanList?.map(x => x?.name),
+    // );
+
     possibleDeviceList.forEach(name => {
       let find = cleanList?.find(x => x?.name === name);
       if (find) result.push(find);
     });
+
     setList(result);
   }, [possibleDeviceList]);
 
@@ -77,7 +98,6 @@ export default function 검색된장비_리스트({
   useEffect(() => {
     bleManagerEmitter.addListener('BleManagerDiscoverPeripheral', scanning);
     bleManagerEmitter.addListener('BleManagerStopScan', stopScan);
-    startScan();
     return () => {
       bleManagerEmitter.removeAllListeners('BleManagerDiscoverPeripheral');
       bleManagerEmitter.removeAllListeners('BleManagerStopScan');

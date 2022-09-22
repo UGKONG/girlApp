@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import React, {Dispatch, SetStateAction, useCallback, useEffect} from 'react';
 import {Switch} from 'react-native';
 import styled from 'styled-components/native';
@@ -13,11 +14,13 @@ export default function 블루투스_스위치({state, setState}: Props) {
     setState(true);
     BluetoothSerial.enable().then(() => setState(true));
   }, [setState]);
+
   // 블루투스 끄기
   const bluetoothOff = useCallback((): void => {
     setState(false);
     BluetoothSerial.disable().then(() => setState(false));
   }, [setState]);
+
   // 블루투스 켜짐/꺼짐 확인
   const isEnabled = useCallback((): void => {
     BluetoothSerial.isEnabled().then(setState);

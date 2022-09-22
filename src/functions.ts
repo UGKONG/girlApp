@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable no-bitwise */
 import create from 'zustand';
 import type {Store} from './types';
