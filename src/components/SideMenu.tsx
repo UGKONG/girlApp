@@ -1,6 +1,4 @@
-/* eslint-disable prettier/prettier */
 /* eslint-disable curly */
-/* eslint-disable prettier/prettier */
 import React, {useState, useMemo, useCallback, useEffect, useRef} from 'react';
 import {Animated, Easing} from 'react-native';
 import {NavigationContainerRefWithCurrent} from '@react-navigation/native';
