@@ -1,4 +1,4 @@
-/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable curly */
 import React, {useEffect} from 'react';
 import {Platform, StatusBar, BackHandler, Alert} from 'react-native';

@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import React, {useEffect, useState} from 'react';
 import BleManager from 'react-native-ble-manager';
 import ScanList from './ScanList';

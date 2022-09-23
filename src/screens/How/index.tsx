@@ -4,19 +4,22 @@ import styled from 'styled-components/native';
 import Container from '../../components/Container';
 import TextPage from '../../components/TextPage';
 import Slider from '../../components/Slider';
-import {StrengthList, DurationList} from '../../types';
+import {
+  Row as _Row,
+  RowTitle as _RowTitle,
+  SliderContainer,
+  SliderTextWrap,
+  SliderText,
+  listStep,
+  listFirst,
+  listLast,
+} from '../Home';
 
 export default function 사용방법() {
-  const strengthList = useRef<StrengthList>([1, 2, 3, 4, 5]);
-  const durationList = useRef<DurationList>([5, 10, 15, 20, 25]);
-  const [strength, setStrength] = useState<number>(strengthList?.current[1]);
-  const [duration, setDuration] = useState<number>(durationList?.current[2]);
-
-  // 리스트 Step, Min, Max
-  type List = StrengthList | DurationList;
-  const listStep = (list: List) => list[1] - list[0];
-  const listFirst = (list: List) => list[0];
-  const listLast = (list: List) => list[list?.length - 1];
+  const strengthList = useRef<number[]>([1, 2, 3, 4, 5]);
+  const durationList = useRef<number[]>([5, 10, 15, 20, 25]);
+  const strength = useRef<number>(strengthList?.current[1]);
+  const duration = useRef<number>(durationList?.current[2]);
 
   return (
     <Container.Scroll>
@@ -38,7 +41,7 @@ export default function 사용방법() {
                 key={txt}
                 count={strengthList?.current?.length}
                 idx={i}
-                active={Number(txt) === strength}
+                active={Number(txt) === strength.current}
                 ismargin={txt >= 10}>
                 {txt}
               </SliderText>
@@ -49,7 +52,7 @@ export default function 사용방법() {
             min={listFirst(strengthList?.current)}
             max={listLast(strengthList?.current)}
             color={'#e46b8b'}
-            value={strength}
+            value={strength.current}
             disabled={true}
           />
         </SliderContainer>
@@ -68,7 +71,7 @@ export default function 사용방법() {
                 key={txt}
                 count={durationList?.current?.length}
                 idx={i}
-                active={Number(txt) === duration}
+                active={Number(txt) === duration.current}
                 ismargin={txt >= 10}>
                 {txt}
               </SliderText>
@@ -79,7 +82,7 @@ export default function 사용방법() {
             min={listFirst(durationList?.current)}
             max={listLast(durationList?.current)}
             color={'#e46b8b'}
-            value={duration}
+            value={duration.current}
             disabled={true}
           />
         </SliderContainer>
@@ -102,51 +105,14 @@ dono.LUNA는 조작 버튼 또는 LED를 구비하고 있지 않습니다. (속 
   );
 }
 
-const Row = styled.View`
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  padding: 0 20px;
-  background-color: #f2bbd0;
+const Row = styled(_Row)`
+  background-color: #f1c3d5;
   padding: 20px 10px 40px 0;
   border-radius: 10px;
   border: 2px solid #fff;
   position: relative;
 `;
-const RowTitle = styled.Text`
-  width: 100px;
-  text-align: center;
-  font-size: 16px;
-  font-weight: 700;
-  color: #fff;
-  text-shadow: 0 0 5px #df5e90;
-  margin-right: 10px;
+const RowTitle = styled(_RowTitle)`
+  color: #da6e89;
   white-space: nowrap;
-`;
-const SliderContainer = styled.View`
-  position: relative;
-  flex: 1;
-`;
-const SliderTextWrap = styled.View`
-  position: absolute;
-  top: 100%;
-  left: 0;
-  padding: 0 11px;
-  width: 100%;
-  height: 24px;
-  flex-direction: row;
-  justify-content: space-between;
-`;
-type SlideTextProps = {
-  count: number;
-  idx: number;
-  active: boolean;
-  ismargin: boolean;
-};
-const SliderText = styled.Text`
-  color: ${(x: SlideTextProps) => (x?.active ? '#e46b8b' : '#e46b8b66')};
-  font-weight: ${(x: SlideTextProps) => (x?.active ? 700 : 400)};
-  transform: translateX(
-    ${(x: SlideTextProps) => (x?.ismargin ? '4px' : '0px')}
-  );
 `;

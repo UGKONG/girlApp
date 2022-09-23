@@ -38,11 +38,6 @@ export default function 홈({navigation}: Props) {
     [duration, strength],
   );
 
-  // 리스트 Step, Min, Max
-  const listStep = (list: number[]): number => list[1] - list[0];
-  const listFirst = (list: number[]): number => list[0];
-  const listLast = (list: number[]): number => list[list?.length - 1];
-
   // 루나 시작
   const startLuna = (): void => {
     const str: string = `에너지: ${strength}단계, 타이머: ${duration}분`;
@@ -107,32 +102,35 @@ export default function 홈({navigation}: Props) {
     </Container.View>
   );
 }
+// 리스트 Step, Min, Max
+export const listStep = (list: number[]): number => list[1] - list[0];
+export const listFirst = (list: number[]): number => list[0];
+export const listLast = (list: number[]): number => list[list?.length - 1];
 
 const RemoteContainer = styled.View`
   width: 100%;
   flex: 1;
   justify-content: space-around;
 `;
-const Row = styled.View`
+export const Row = styled.View`
   flex-direction: row;
   justify-content: center;
   align-items: center;
   padding: 0 20px;
 `;
-const RowTitle = styled.Text`
+export const RowTitle = styled.Text`
   width: 100px;
   text-align: center;
   font-size: 16px;
   font-weight: 700;
-  color: #e7839c;
-  /* text-shadow: 0 0 5px #df5e90; */
+  color: #da6e89;
   margin-right: 10px;
 `;
-const SliderContainer = styled.View`
+export const SliderContainer = styled.View`
   position: relative;
   flex: 1;
 `;
-const SliderTextWrap = styled.View`
+export const SliderTextWrap = styled.View`
   position: absolute;
   top: 100%;
   left: 0;
@@ -148,8 +146,8 @@ type SlideTextProps = {
   active: boolean;
   ismargin: boolean;
 };
-const SliderText = styled.Text`
-  color: ${(x: SlideTextProps) => (x?.active ? '#e46b8b' : '#e7839c')};
+export const SliderText = styled.Text`
+  color: ${(x: SlideTextProps) => (x?.active ? '#d0446a' : '#ed95ab')};
   font-weight: ${(x: SlideTextProps) => (x?.active ? 700 : 400)};
   transform: translateX(
     ${(x: SlideTextProps) => (x?.ismargin ? '4px' : '0px')}

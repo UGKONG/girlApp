@@ -21,7 +21,6 @@ export default function 사이드메뉴({navigationRef}: Props): JSX.Element {
     {id: 'sns', name: 'SNS 둘러보기'},
     {id: 'days', name: 'LUNA days'},
     {id: 'log', name: '사용 로그'},
-    {id: 'help', name: '도움말'},
     {id: 'setting', name: '설정'},
   ]);
   const [isLocalMenu, setIsLocalMenu] = useState(isMenu);
