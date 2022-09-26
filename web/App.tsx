@@ -1,61 +1,47 @@
-import React, {useEffect} from 'react';
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, {useState} from 'react';
 import styled from 'styled-components';
 
 export default function App(): JSX.Element {
-  const kakaoLoginRequest = (): void => {
-    console.log('로그인 요청');
-    (window as any).Kakao.Auth.authorize({
-      redirectUri: 'http://192.168.0.117:9000/',
-      throughTalk: false,
-      prompts: 'none',
-    });
+  const {Kakao, ReactNativeWebView}: any = window as any;
+  type SendData = {id: number; name: string; platform: string};
+  const [userData, setUserData] = useState<SendData | null>(null);
+  const kakaoRedirectURL: string = 'http://192.168.45.236/';
 
-    return;
-    (window as any).Kakao.Auth.login({
-      success: () => {
-        (window as any).Kakao.API.request({
-          url: '/v2/user/me',
-        })
-          .then((res: any) => {
-            console.log(res);
-          })
-          .catch(() => {
-            console.log('kakaoAPI Errer!!!');
-          });
+  // 카카오 로그인 성공 (3)
+  const kakaoLoginSuccess = (sendData: SendData): void => {
+    setUserData(sendData);
+    ReactNativeWebView?.postMessage(JSON.stringify(sendData));
+  };
+
+  // 유저 데이터 조회 (2)
+  const getUserData = (): void => {
+    alert('로그인 완료');
+
+    Kakao.API.request({
+      url: '/v2/user/me',
+      success: (res: any): void => {
+        let id: number = (res?.id as number) ?? 0;
+        let name: string = res?.kakao_account?.profile?.nickname ?? '';
+        let platform: string = 'kakao';
+
+        const sendData: SendData = {id, name, platform};
+        kakaoLoginSuccess(sendData);
       },
     });
   };
 
-  const kakaoLoginSuccess = () => {
-    // kakao.API.request({
-    //   url: '/v2/user/me',
-    //   success: (res: any) => {
-    //     console.log(res);
-    //     return;
-    //     let authId = res?.id ?? null;
-    //     let email = res?.kakao_account?.email ?? null;
-    //     let name = res?.kakao_account?.profile?.nickname ?? null;
-    //     let img = res?.kakao_account?.profile?.thumbnail_image_url ?? null;
-    //     let platform = 'kakao';
-    //     const sendData: string = JSON.stringify({
-    //       authId,
-    //       email,
-    //       name,
-    //       img,
-    //       platform,
-    //     });
-    //     alert(sendData);
-    //     (window as any)?.ReactNativeWebView?.postMessage(sendData);
-    //     (window as any)?.ReactNativeWebView?.postMessage('kakao_login_success');
-    //   },
-    // });
-    //   },
-    // });
-  };
+  // 카카오 로그인 셋팅 (1)
+  const kakaoLoginInit = (): void => {
+    const find = window.location.href?.indexOf('?code=') > -1;
+    if (find) {
+      getUserData();
+      return;
+    }
 
-  useEffect(() => {
-    // kakaoLoginRequest();
-  }, []);
+    Kakao.Auth.login({kakaoRedirectURL});
+  };
 
   return (
     <Container>
@@ -63,21 +49,15 @@ export default function App(): JSX.Element {
       <Form>
         <KakaoIcon
           url={require('../assets/images/loginIcon/kakao.png').default}
-          onClick={kakaoLoginRequest}
+          onClick={kakaoLoginInit}
         />
         <NaverIcon
           url={require('../assets/images/loginIcon/naver.png').default}
         />
-        <Button
-          onClick={() => {
-            // kakaoLoginRequest();
-            // return;
-            // console.log((window as any)?.ReactNativeWebView);
-            // (window as any)?.ReactNativeWebView?.postMessage('hello RN');
-          }}>
-          로그인 완료하기
-        </Button>
       </Form>
+      <p style={{marginTop: 40}}>
+        아이디: {userData?.id} / 이름: {userData?.name}
+      </p>
     </Container>
   );
 }

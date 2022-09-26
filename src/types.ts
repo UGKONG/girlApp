@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import type {Dispatch, SetStateAction} from 'react';
 import type {Peripheral, PeripheralInfo} from 'react-native-ble-manager';
 

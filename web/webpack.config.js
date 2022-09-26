@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable no-path-concat */
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
@@ -74,6 +75,6 @@ module.exports = {
   devServer: {
     open: true,
     hot: true,
-    port: 9000,
+    port: 80,
   },
 };

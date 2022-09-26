@@ -1,57 +1,51 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable curly */
 import React, {useCallback, useMemo} from 'react';
+import {Alert} from 'react-native';
 import {WebView, WebViewMessageEvent} from 'react-native-webview';
 import styled from 'styled-components/native';
 import {store} from '../../functions';
-import type {LoginStaus} from '../../types';
+// import type {LoginStaus} from '../../types';
 import Toast from 'react-native-toast-message';
 
 export default function 로그인(): JSX.Element {
   const dispatch = store(x => x?.setState);
-  const kakaoLoginURL: string =
-    'https://kauth.kakao.com/oauth/authorize?response_type=code';
-  const kakaoClientId: string = '0e0a649018457f1ff5a1d0704924598d';
-  const kakaoRedirectURL: string = 'http://192.168.0.117:9000/';
 
   const submit = useCallback(
     ({nativeEvent: {data}}: WebViewMessageEvent): void => {
       if (!dispatch) return;
-      const status = data as LoginStaus;
-      let platform: string = '';
+      Alert.alert(data);
+      // const status = data as LoginStaus;
+      // console.log(status);
+      // let platform: string = '';
 
-      if (status === 'kakao_login_success') {
-        platform = 'kakao';
-        dispatch('isLogin', {
-          USER_ID: 1,
-          USER_NAME: '테스트',
-          USER_ACCOUNT: 'test',
-          PLATFORM: platform,
-        });
-      } else if (status === 'naver_login_success') {
-        platform = 'naver';
-      } else {
-        return;
-      }
+      // if (status === 'kakao_login_success') {
+      //   platform = 'kakao';
+      //   dispatch('isLogin', {
+      //     USER_ID: 1,
+      //     USER_NAME: '테스트',
+      //     USER_ACCOUNT: 'test',
+      //     PLATFORM: platform,
+      //   });
+      // } else if (status === 'naver_login_success') {
+      //   platform = 'naver';
+      // } else {
+      //   return;
+      // }
 
       dispatch('isModal', null);
-      Toast.show({
-        type: 'success',
-        text1: platform + '로그인에 성공하였습니다.',
-        text2: '테스트 회원님 반갑습니다.',
-      });
+      // Toast.show({
+      //   type: 'success',
+      //   text1: platform + '로그인에 성공하였습니다.',
+      //   text2: '테스트 회원님 반갑습니다.',
+      // });
     },
     [dispatch],
   );
 
   return (
-    <WebView
-      source={{
-        // uri: `${kakaoLoginURL}&client_id=${kakaoClientId}&redirect_uri=${kakaoRedirectURL}`,
-        uri: 'http://192.168.0.117:9000',
-      }}
-      onMessage={submit}
-    />
+    <WebView source={{uri: 'http://192.168.45.236/'}} onMessage={submit} />
   );
 
   // return (
