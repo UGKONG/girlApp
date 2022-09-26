@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import type {Dispatch, SetStateAction} from 'react';
 import type {Peripheral, PeripheralInfo} from 'react-native-ble-manager';
 
@@ -12,11 +11,12 @@ export type User = {
   UESR_ACCOUNT: string;
   PLATFORM: string;
 };
-export type SetConnectedDevice = Dispatch<SetStateAction<ConnectedDevice>>;
+export type SetState<T> = Dispatch<SetStateAction<T>>;
 export type Store = {
   isModal: boolean;
   isMenu: boolean;
   isLogin: null | User;
+  loginRequired: boolean;
   activeScreen: string | null;
   possibleDeviceList: string[];
   setState: (type: string, payload: any) => void;
@@ -29,3 +29,4 @@ export type DayObject = {
   month: number;
   day: number;
 };
+export type LoginStaus = 'kakao_login_success' | 'naver_login_success';

@@ -15,7 +15,7 @@ import {
   listLast,
 } from '../Home';
 
-export default function 사용방법() {
+export default function 사용방법(): JSX.Element {
   const strengthList = useRef<number[]>([1, 2, 3, 4, 5]);
   const durationList = useRef<number[]>([5, 10, 15, 20, 25]);
   const strength = useRef<number>(strengthList?.current[1]);

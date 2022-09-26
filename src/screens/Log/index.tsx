@@ -1,20 +1,23 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import React, {useMemo} from 'react';
+import React, {useEffect, useMemo} from 'react';
 import styled from 'styled-components/native';
 import Container from '../../components/Container';
 import TextPage from '../../components/TextPage';
 import {Calendar} from 'react-native-calendars';
 import type {DayObject} from '../../types';
-import {useDate} from '../../functions';
+import {store, useDate} from '../../functions';
 
-export default function 사용로그() {
-  const onDayPress = (day: DayObject) => {
+export default function 사용로그(): JSX.Element {
+  const dispatch = store(x => x?.setState);
+  const isLogin = store(x => x?.isLogin);
+
+  const onDayPress = (day: DayObject): void => {
     console.log(day);
   };
 
-  const today = useMemo(() => {
-    type Result = {[key: string]: any};
-    let result: Result = {};
+  type Today = {[key: string]: any};
+  const today = useMemo((): Today => {
+    let result: Today = {};
 
     result[useDate(undefined, 'date')] = {
       selected: true,
@@ -23,6 +26,13 @@ export default function 사용로그() {
 
     return result;
   }, []);
+
+  useEffect((): void => {
+    if (!isLogin) {
+      dispatch('isModal', true);
+      dispatch('loginRequired', true);
+    }
+  }, [dispatch, isLogin]);
 
   return (
     <Container.Scroll>

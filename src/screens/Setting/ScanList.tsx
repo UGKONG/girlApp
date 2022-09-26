@@ -1,40 +1,31 @@
-/* eslint-disable prettier/prettier */
-/* eslint-disable prettier/prettier */
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable curly */
-import React, {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {NativeModules, NativeEventEmitter} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import styled from 'styled-components/native';
 import BleManager from 'react-native-ble-manager';
 import {Container, Header, Title, List as _List} from './ConnectedList';
 import BluetoothSerial from 'react-native-bluetooth-serial-next';
-import {Device, ConnectedDevice} from '../../types';
 import ScanItem from './ScanItem';
 import {store} from '../../functions';
+import type {Device, ConnectedDevice, SetState} from '../../types';
 
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
 type Props = {
   state: boolean;
-  setState: Dispatch<SetStateAction<boolean>>;
+  setState: SetState<boolean>;
   connectedDevice: ConnectedDevice;
-  setConnectedDevice: Dispatch<SetStateAction<ConnectedDevice>>;
+  setConnectedDevice: SetState<ConnectedDevice>;
 };
 export default function 검색된장비_리스트({
   state,
   setState,
   connectedDevice,
   setConnectedDevice,
-}: Props) {
+}: Props): JSX.Element {
   const possibleDeviceList = store<string[]>(x => x?.possibleDeviceList);
   const scanList = useRef<Device[]>([]);
   const [isScan, setIsScan] = useState<boolean>(false);
@@ -54,7 +45,10 @@ export default function 검색된장비_리스트({
 
   // 검색 시작
   const startScan = useCallback((): void => {
-    if (!state) return bluetoothOn(startScan);
+    if (!state) {
+      bluetoothOn(startScan);
+      return;
+    }
 
     scanList.current = [];
     setList([]);
@@ -95,7 +89,7 @@ export default function 검색된장비_리스트({
     scanListClean();
   }, [scanListClean]);
 
-  useEffect(() => {
+  useEffect((): (() => void) => {
     bleManagerEmitter.addListener('BleManagerDiscoverPeripheral', scanning);
     bleManagerEmitter.addListener('BleManagerStopScan', stopScan);
     return () => {

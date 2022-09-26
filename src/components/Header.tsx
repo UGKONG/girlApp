@@ -1,6 +1,4 @@
-/* eslint-disable prettier/prettier */
 import React from 'react';
-import {Alert} from 'react-native';
 import styled from 'styled-components/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -26,6 +24,7 @@ export default function 해더({navigation}: Props) {
 
   const login = (): void => {
     dispatch('isModal', true);
+    dispatch('loginRequired', false);
   };
 
   const menuOpen = (): void => {

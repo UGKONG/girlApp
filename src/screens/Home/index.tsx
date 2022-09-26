@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import React, {useMemo, useRef, useState} from 'react';
 import styled from 'styled-components/native';
 import Container from '../../components/Container';
@@ -8,18 +7,26 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {ParamListBase} from '@react-navigation/native';
 import SymbolMenu from './SymbolMenu';
 import {store} from '../../functions';
+import type {SetState} from '../../types';
 
 type Props = {
   navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
 };
-export default function 홈({navigation}: Props) {
+export default function 홈({navigation}: Props): JSX.Element {
   const isLogin = store(x => x?.isLogin);
   const strengthList = useRef<number[]>([1, 2, 3, 4, 5]);
   const durationList = useRef<number[]>([5, 10, 15, 20, 25]);
   const [strength, setStrength] = useState<number>(strengthList?.current[1]);
   const [duration, setDuration] = useState<number>(durationList?.current[2]);
+  type RemoteList = {
+    name: string;
+    list: number[];
+    color: string;
+    value: number;
+    setValue: SetState<number>;
+  };
   const remoteList = useMemo(
-    () => [
+    (): RemoteList[] => [
       {
         name: '에너지',
         list: strengthList?.current,

@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 /* eslint-disable no-bitwise */
 import create from 'zustand';
 import type {Store} from './types';
@@ -7,6 +6,7 @@ export const store = create<Store>(set => ({
   isModal: false,
   isMenu: false,
   isLogin: null,
+  loginRequired: false,
   activeScreen: null,
   possibleDeviceList: ['DoNoLUNA-0228'],
   setState: (type: string, payload: any) =>

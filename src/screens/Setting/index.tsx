@@ -6,7 +6,7 @@ import BluetoothSwitch from './BluetoothSwitch';
 import ConnectedList from './ConnectedList';
 import Container from '../../components/Container';
 
-export default function 디바이스_설정() {
+export default function 디바이스_설정(): JSX.Element {
   const [state, setState] = useState<boolean>(true);
   const [connectedDevice, setConnectedDevice] = useState<ConnectedDevice>(null);
 
@@ -18,7 +18,7 @@ export default function 디바이스_설정() {
       .finally(() => BleManager.start({showAlert: false}));
   };
 
-  useEffect(() => {
+  useEffect((): void => {
     init();
   }, []);
 

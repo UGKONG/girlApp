@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable curly */
 import React, {useEffect} from 'react';
 import {Platform, StatusBar, BackHandler, Alert} from 'react-native';
@@ -7,20 +6,17 @@ import {
   useNavigationContainerRef,
 } from '@react-navigation/native';
 import {request, PERMISSIONS} from 'react-native-permissions';
-import styled from 'styled-components/native';
-import Icon from 'react-native-vector-icons/Ionicons';
 import {store} from './functions';
 import MyNavigator from './navigator';
 import SideMenu from './components/SideMenu';
-import LoginScreen from './screens/Login';
-import Toast, {ToastConfigParams} from 'react-native-toast-message';
+import LoginModal from './components/LoginModal';
+import Toast from 'react-native-toast-message';
 
 const os = Platform.OS;
 
-export default function App() {
+export default function App(): JSX.Element {
   const navigationRef = useNavigationContainerRef();
   const isModal = store<boolean>(x => x?.isModal);
-  const dispatch = store(x => x?.setState);
 
   // 안드로이드 위치 권한 요청
   const androidLocationRequest = (fn: any): void => {
@@ -43,7 +39,7 @@ export default function App() {
   }, []);
 
   // 안드로이드 뒤로가기 버튼 클릭
-  useEffect(() => {
+  useEffect((): (() => void) => {
     const backBtnClick = (): boolean => {
       const rootState = navigationRef?.getRootState();
       const name = rootState?.routes[rootState?.routes?.length - 1]?.name;
@@ -72,38 +68,10 @@ export default function App() {
 
       <MyNavigator />
 
-      <Modal visible={isModal}>
-        <CloseBtn onPress={() => dispatch('isModal', false)}>
-          <CloseIcon />
-        </CloseBtn>
-        <LoginScreen />
-      </Modal>
+      <LoginModal isModal={isModal} />
 
       <SideMenu navigationRef={navigationRef} />
       <Toast />
     </NavigationContainer>
   );
 }
-
-const Modal = styled.Modal.attrs(() => ({
-  transparent: false,
-  animationType: 'slide',
-  presentationStyle: 'formSheet',
-}))``;
-const CloseBtn = styled.TouchableOpacity.attrs(() => ({
-  activeOpacity: 0.7,
-}))`
-  width: 40px;
-  height: 40px;
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-`;
-const CloseIcon = styled(Icon).attrs(() => ({
-  name: 'ios-arrow-down',
-  color: '#ccc',
-  size: 26,
-}))``;

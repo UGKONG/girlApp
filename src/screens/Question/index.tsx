@@ -2,7 +2,7 @@ import React from 'react';
 import Container from '../../components/Container';
 import TextPage from '../../components/TextPage';
 
-export default function 루나란() {
+export default function 루나란(): JSX.Element {
   return (
     <Container.Scroll>
       <TextPage.HelloText>What is dono.LUNA?</TextPage.HelloText>

@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, {useRef} from 'react';
 import {Linking} from 'react-native';
 import styled from 'styled-components/native';
 import Container from '../../components/Container';
 import TextPage from '../../components/TextPage';
 
-export default function SNS둘러보기() {
-  type SnsBtnList = {name: string; top: number; left: number; url: string}[];
-  const snsBtnList = useRef<SnsBtnList>([
+export default function SNS둘러보기(): JSX.Element {
+  type SnsBtnList = {name: string; top: number; left: number; url: string};
+  const snsBtnList = useRef<SnsBtnList[]>([
     {name: 'naverBlog', top: 10, left: 88, url: 'https://naver.com'},
     {name: 'facebook', top: 10, left: 236, url: 'https://facebook.com'},
     {name: 'instagram', top: 136, left: 276, url: 'https://instagram.com'},

@@ -1,23 +1,22 @@
-/* eslint-disable prettier/prettier */
 /* eslint-disable no-shadow */
 /* eslint-disable curly */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, {Dispatch, SetStateAction, useCallback, useMemo} from 'react';
+import React, {useCallback, useMemo} from 'react';
 import {Alert} from 'react-native';
 import styled from 'styled-components/native';
 import BleManager from 'react-native-ble-manager';
-import type {ConnectedDevice, Device} from '../../types';
+import type {ConnectedDevice, Device, SetState} from '../../types';
 
 type Props = {
   data: Device;
   connectedDevice: ConnectedDevice;
-  setConnectedDevice: Dispatch<SetStateAction<ConnectedDevice>>;
+  setConnectedDevice: SetState<ConnectedDevice>;
 };
 export default function 스캔된장비_아이템({
   data,
   connectedDevice,
   setConnectedDevice,
-}: Props) {
+}: Props): JSX.Element {
   // 장비 클릭
   const onClick = (): void => {
     BleManager.connect(data?.id)

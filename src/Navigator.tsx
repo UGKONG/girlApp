@@ -11,7 +11,7 @@ import SettingScreen from './screens/Setting';
 
 const Stack = createNativeStackNavigator();
 
-export default function Navigator() {
+export default function Navigator(): JSX.Element {
   return (
     <Stack.Navigator
       initialRouteName="home"
