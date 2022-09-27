@@ -15,7 +15,7 @@ export default function 로그인(): JSX.Element {
   const submit = useCallback(
     ({nativeEvent: {data}}: WebViewMessageEvent): void => {
       if (!dispatch) return;
-      Alert.alert(data);
+      console.log(data);
       // const status = data as LoginStaus;
       // console.log(status);
       // let platform: string = '';
@@ -44,9 +44,7 @@ export default function 로그인(): JSX.Element {
     [dispatch],
   );
 
-  return (
-    <WebView source={{uri: 'http://192.168.45.236/'}} onMessage={submit} />
-  );
+  return <WebView source={{uri: 'http://192.168.0.117/'}} onMessage={submit} />;
 
   // return (
   //   <Container.View>

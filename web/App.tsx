@@ -7,7 +7,7 @@ export default function App(): JSX.Element {
   const {Kakao, ReactNativeWebView}: any = window as any;
   type SendData = {id: number; name: string; platform: string};
   const [userData, setUserData] = useState<SendData | null>(null);
-  const kakaoRedirectURL: string = 'http://192.168.45.236/';
+  const kakaoRedirectURL: string = 'http://192.168.0.117/';
 
   // 카카오 로그인 성공 (3)
   const kakaoLoginSuccess = (sendData: SendData): void => {
@@ -17,6 +17,7 @@ export default function App(): JSX.Element {
 
   // 유저 데이터 조회 (2)
   const getUserData = (): void => {
+    ReactNativeWebView?.postMessage('hi');
     alert('로그인 완료');
 
     Kakao.API.request({
@@ -34,13 +35,13 @@ export default function App(): JSX.Element {
 
   // 카카오 로그인 셋팅 (1)
   const kakaoLoginInit = (): void => {
-    const find = window.location.href?.indexOf('?code=') > -1;
-    if (find) {
-      getUserData();
-      return;
-    }
+    // const find = window.location.href?.indexOf('?code=') > -1;
+    // if (find) {
+    //   getUserData();
+    //   return;
+    // }
 
-    Kakao.Auth.login({kakaoRedirectURL});
+    Kakao.Auth.login({success: getUserData});
   };
 
   return (
