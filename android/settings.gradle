@@ -8,4 +8,6 @@ if (settings.hasProperty("newArchEnabled") && settings.newArchEnabled == "true")
     project(":ReactAndroid").projectDir = file('../node_modules/react-native/ReactAndroid')
     include(":ReactAndroid:hermes-engine")
     project(":ReactAndroid:hermes-engine").projectDir = file('../node_modules/react-native/ReactAndroid/hermes-engine')
+    include ':react-native-seoul-naver-login'
+    project(':react-native-seoul-naver-login').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-seoul/naver-login/android')
 }

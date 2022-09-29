@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">girlApp</string>
+    <string name="app_name">LUNA</string>
+    <string name="kakao_app_key">e8a1a2641bc60e7a7dd92e87c9965ec5</string>
 </resources>

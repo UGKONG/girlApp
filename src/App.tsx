@@ -11,11 +11,13 @@ import MyNavigator from './navigator';
 import SideMenu from './components/SideMenu';
 import LoginModal from './components/LoginModal';
 import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const os = Platform.OS;
 
 export default function App(): JSX.Element {
   const navigationRef = useNavigationContainerRef();
+  const dispatch = store(x => x?.setState);
   const isModal = store<boolean>(x => x?.isModal);
 
   // 안드로이드 위치 권한 요청
@@ -30,6 +32,20 @@ export default function App(): JSX.Element {
     request(PERMISSIONS.IOS.LOCATION_ALWAYS).then(x => {
       if (x === 'denied') fn();
     });
+  };
+
+  // 자동 로그인 체크
+  const autoLoginCheck = () => {
+    AsyncStorage.getItem(
+      'isLogin',
+      (
+        err: Error | null | undefined,
+        result: string | null | undefined,
+      ): void => {
+        if (err || !result) return;
+        dispatch('isLogin', JSON.parse(result));
+      },
+    );
   };
 
   // 권한 요청
@@ -61,6 +77,9 @@ export default function App(): JSX.Element {
       BackHandler.removeEventListener('hardwareBackPress', backBtnClick);
     };
   }, [navigationRef]);
+
+  // 자동로그인체크
+  useEffect(autoLoginCheck, [dispatch]);
 
   return (
     <NavigationContainer ref={navigationRef}>

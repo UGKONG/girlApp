@@ -18,7 +18,10 @@
     "build:android": "npx react-native bundle --platform android --dev false --entry-file index.ts --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.17.10",
     "@react-native-community/slider": "^4.3.1",
+    "@react-native-seoul/kakao-login": "4.0.0",
+    "@react-native-seoul/naver-login": "^2.3.0",
     "@react-navigation/bottom-tabs": "^6.3.3",
     "@react-navigation/native": "^6.0.13",
     "@react-navigation/native-stack": "^6.8.0",
@@ -30,7 +33,7 @@
     "react-native-calendars": "^1.1289.0",
     "react-native-paper": "^4.12.4",
     "react-native-permissions": "^3.6.1",
-    "react-native-safe-area-context": "^4.3.4",
+    "react-native-safe-area-context": "^4.4.1",
     "react-native-screens": "^3.17.0",
     "react-native-toast-message": "^2.1.5",
     "react-native-vector-icons": "^9.2.0",

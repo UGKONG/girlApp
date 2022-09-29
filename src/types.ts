@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import type {Dispatch, SetStateAction} from 'react';
 import type {Peripheral, PeripheralInfo} from 'react-native-ble-manager';
 
@@ -7,9 +6,8 @@ declare module '*.png';
 export type Device = Peripheral;
 export type ConnectedDevice = null | PeripheralInfo;
 export type User = {
-  USER_ID: number;
+  USER_ID: string;
   USER_NAME: string;
-  UESR_ACCOUNT: string;
   PLATFORM: string;
 };
 export type SetState<T> = Dispatch<SetStateAction<T>>;
@@ -30,4 +28,21 @@ export type DayObject = {
   month: number;
   day: number;
 };
-export type LoginStaus = 'kakao_login_success' | 'naver_login_success';
+export type SnsLoginList = {
+  id: number;
+  name: '카카오' | '네이버';
+  img: string;
+  color: string;
+  onPress: () => void;
+};
+export type SnsLoginData = {
+  platform: 'Kakao' | 'Naver';
+  id: string;
+  name: string;
+};
+export type NaverLoginPlatformKey = {
+  kConsumerKey: string;
+  kConsumerSecret: string;
+  kServiceAppName: string;
+  kServiceAppUrlScheme?: string;
+};
