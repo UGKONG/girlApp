@@ -3,7 +3,7 @@ import React, {useState, useMemo, useCallback, useEffect, useRef} from 'react';
 import {Animated, Easing} from 'react-native';
 import {NavigationContainerRefWithCurrent} from '@react-navigation/native';
 import styled from 'styled-components/native';
-import {store} from '../functions';
+import store from '../store';
 
 type Props = {
   navigationRef: NavigationContainerRefWithCurrent<ReactNavigation.RootParamList>;

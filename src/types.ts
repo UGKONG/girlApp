@@ -1,8 +1,6 @@
 import type {Dispatch, SetStateAction} from 'react';
 import type {Peripheral, PeripheralInfo} from 'react-native-ble-manager';
 
-declare module '*.png';
-
 export type Device = Peripheral;
 export type ConnectedDevice = null | PeripheralInfo;
 export type User = {
@@ -12,6 +10,7 @@ export type User = {
 };
 export type SetState<T> = Dispatch<SetStateAction<T>>;
 export type Store = {
+  activeDevice: null | Device;
   isModal: boolean;
   isMenu: boolean;
   isLogin: null | User;
@@ -45,4 +44,13 @@ export type NaverLoginPlatformKey = {
   kConsumerSecret: string;
   kServiceAppName: string;
   kServiceAppUrlScheme?: string;
+};
+export type ConvertString = {
+  stringToBytes: (str: string) => number[];
+};
+export type SendDataInfo = {
+  id: string;
+  serviceUUID: string;
+  characteristicUUID: string;
+  value?: number[];
 };

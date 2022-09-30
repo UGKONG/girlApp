@@ -6,7 +6,7 @@ import {Alert} from 'react-native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {ParamListBase} from '@react-navigation/native';
 import SymbolMenu from './SymbolMenu';
-import {store} from '../../functions';
+import store from '../../store';
 import type {SetState} from '../../types';
 
 type Props = {

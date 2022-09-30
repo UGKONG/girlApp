@@ -1,12 +1,17 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, {useEffect, useState} from 'react';
 import BleManager from 'react-native-ble-manager';
 import ScanList from './ScanList';
-import type {ConnectedDevice} from '../../types';
+import {ConnectedDevice, User} from '../../types';
 import BluetoothSwitch from './BluetoothSwitch';
 import ConnectedList from './ConnectedList';
 import Container from '../../components/Container';
+import store from '../../store';
+import {Button} from 'react-native';
 
 export default function 디바이스_설정(): JSX.Element {
+  const dispatch = store(x => x?.setState);
+  const isLogin = store<null | User>(x => x?.isLogin);
   const [state, setState] = useState<boolean>(true);
   const [connectedDevice, setConnectedDevice] = useState<ConnectedDevice>(null);
 
@@ -19,6 +24,13 @@ export default function 디바이스_설정(): JSX.Element {
   };
 
   useEffect((): void => {
+    if (!isLogin) {
+      dispatch('isModal', true);
+      dispatch('loginRequired', true);
+    }
+  }, [dispatch, isLogin]);
+
+  useEffect((): void => {
     init();
   }, []);
 
@@ -29,7 +41,6 @@ export default function 디바이스_설정(): JSX.Element {
       <ScanList
         state={state}
         setState={setState}
-        connectedDevice={connectedDevice}
         setConnectedDevice={setConnectedDevice}
       />
     </Container.Scroll>

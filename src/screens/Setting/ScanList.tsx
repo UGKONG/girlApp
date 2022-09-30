@@ -8,7 +8,7 @@ import BleManager from 'react-native-ble-manager';
 import {Container, Header, Title, List as _List} from './ConnectedList';
 import BluetoothSerial from 'react-native-bluetooth-serial-next';
 import ScanItem from './ScanItem';
-import {store} from '../../functions';
+import store from '../../store';
 import type {Device, ConnectedDevice, SetState} from '../../types';
 
 const BleManagerModule = NativeModules.BleManager;
@@ -17,13 +17,11 @@ const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 type Props = {
   state: boolean;
   setState: SetState<boolean>;
-  connectedDevice: ConnectedDevice;
   setConnectedDevice: SetState<ConnectedDevice>;
 };
 export default function 검색된장비_리스트({
   state,
   setState,
-  connectedDevice,
   setConnectedDevice,
 }: Props): JSX.Element {
   const possibleDeviceList = store<string[]>(x => x?.possibleDeviceList);
@@ -89,14 +87,25 @@ export default function 검색된장비_리스트({
     scanListClean();
   }, [scanListClean]);
 
+  const notification = useCallback((data: any) => {
+    console.log(data);
+  }, []);
+
   useEffect((): (() => void) => {
     bleManagerEmitter.addListener('BleManagerDiscoverPeripheral', scanning);
     bleManagerEmitter.addListener('BleManagerStopScan', stopScan);
+    bleManagerEmitter.addListener(
+      'BleManagerDidUpdateValueForCharacteristic',
+      notification,
+    );
     return () => {
       bleManagerEmitter.removeAllListeners('BleManagerDiscoverPeripheral');
       bleManagerEmitter.removeAllListeners('BleManagerStopScan');
+      bleManagerEmitter.removeAllListeners(
+        'BleManagerDidUpdateValueForCharacteristic',
+      );
     };
-  }, [startScan, stopScan]);
+  }, [startScan, stopScan, notification]);
 
   return (
     <Container>
@@ -119,7 +128,6 @@ export default function 검색된장비_리스트({
             <ScanItem
               key={item?.id}
               data={item}
-              connectedDevice={connectedDevice}
               setConnectedDevice={setConnectedDevice}
             />
           ))

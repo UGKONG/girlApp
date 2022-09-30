@@ -1,34 +1,8 @@
-/* eslint-disable no-bitwise */
-import create from 'zustand';
-import type {Store} from './types';
+import convertString from 'convert-string';
+import type {ConvertString} from './types';
 
-export const store = create<Store>(set => ({
-  isModal: false,
-  isMenu: false,
-  isLogin: null,
-  loginRequired: false,
-  activeScreen: null,
-  possibleDeviceList: ['DoNoLUNA-0228'],
-  setState: (type: string, payload: any) =>
-    set((state: Store): Store => ({...state, [type]: payload})),
-}));
-
-export const stringToBytes = (str: string) => {
-  let ch: any = [];
-  let st: any = [];
-  let re: any = [];
-
-  for (var i = 0; i < str.length; i++) {
-    ch = str.charCodeAt(i);
-    st = [];
-
-    do {
-      st.push(ch & 0xff);
-      ch = ch >> 8;
-    } while (ch);
-    re = re.concat(st.reverse());
-  }
-  return re;
+export const useStringToBytes = (str: string): number[] => {
+  return (convertString as unknown as ConvertString).stringToBytes(str);
 };
 
 export const useDate = (

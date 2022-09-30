@@ -2,7 +2,7 @@
 import React, {useCallback, useState} from 'react';
 import {Platform} from 'react-native';
 import styled from 'styled-components/native';
-import {store} from '../../functions';
+import store from '../../store';
 import Container from '../../components/Container';
 import Toast from 'react-native-toast-message';
 import useSnsList from './useSnsList';

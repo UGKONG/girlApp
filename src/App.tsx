@@ -6,7 +6,7 @@ import {
   useNavigationContainerRef,
 } from '@react-navigation/native';
 import {request, PERMISSIONS} from 'react-native-permissions';
-import {store} from './functions';
+import store from './store';
 import MyNavigator from './navigator';
 import SideMenu from './components/SideMenu';
 import LoginModal from './components/LoginModal';
@@ -35,13 +35,12 @@ export default function App(): JSX.Element {
   };
 
   // 자동 로그인 체크
+  type AsyncStorageError = Error | null | undefined;
+  type AsyncStorageResult = string | null | undefined;
   const autoLoginCheck = () => {
     AsyncStorage.getItem(
       'isLogin',
-      (
-        err: Error | null | undefined,
-        result: string | null | undefined,
-      ): void => {
+      (err: AsyncStorageError, result: AsyncStorageResult): void => {
         if (err || !result) return;
         dispatch('isLogin', JSON.parse(result));
       },
@@ -83,13 +82,19 @@ export default function App(): JSX.Element {
 
   return (
     <NavigationContainer ref={navigationRef}>
+      {/* Status Bar */}
       <StatusBar barStyle="light-content" />
 
+      {/* Screen Navigation */}
       <MyNavigator />
 
+      {/* Login Modal */}
       <LoginModal isModal={isModal} />
 
+      {/* Side Navigation Bar */}
       <SideMenu navigationRef={navigationRef} />
+
+      {/* Custom Alert */}
       <Toast />
     </NavigationContainer>
   );

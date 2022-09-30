@@ -3,7 +3,7 @@ import styled from 'styled-components/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import logoImage from '../../assets/images/logo-black.png';
-import {store} from '../functions';
+import store from '../store';
 import {User} from '../types';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';

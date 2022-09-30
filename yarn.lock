@@ -1463,6 +1463,11 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
+"@types/convert-string@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@types/convert-string/-/convert-string-0.1.1.tgz#547ae99697289a6481e85671848c2266b0a27554"
+  integrity sha512-lHktaDvzqj6MPnrPB089kaiCe0ZwELOcXEq6RhuqtrOHANB4k9Plbuzhpi35iecDpzbhNNoXNPDwQBDfXUQymQ==
+
 "@types/eslint-visitor-keys@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@types/eslint-visitor-keys/-/eslint-visitor-keys-1.0.0.tgz#1ee30d79544ca84d68d4b3cdb0af4f205663dd2d"
@@ -2688,6 +2693,11 @@ convert-source-map@^1.4.0, convert-source-map@^1.6.0, convert-source-map@^1.7.0:
   integrity sha512-+OQdjP49zViI/6i7nIJpA8rAl4sV/JdPfU9nZs3VqOwGIgizICvuN2ru6fMd+4llL0tar18UYJXfZ/TWtmhUjA==
   dependencies:
     safe-buffer "~5.1.1"
+
+convert-string@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/convert-string/-/convert-string-0.1.0.tgz#79ce41a9bb0d03bcf72cdc6a8f3c56fbbc64410a"
+  integrity sha512-1KX9ESmtl8xpT2LN2tFnKSbV4NiarbVi8DVb39ZriijvtTklyrT+4dT1wsGMHKD3CJUjXgvJzstm9qL9ICojGA==
 
 copy-descriptor@^0.1.0:
   version "0.1.1"

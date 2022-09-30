@@ -5,7 +5,8 @@ import Container from '../../components/Container';
 import TextPage from '../../components/TextPage';
 import {Calendar} from 'react-native-calendars';
 import type {DayObject} from '../../types';
-import {store, useDate} from '../../functions';
+import {useDate} from '../../functions';
+import store from '../../store';
 
 export default function Days(): JSX.Element {
   const dispatch = store(x => x?.setState);
