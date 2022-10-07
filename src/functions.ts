@@ -1,10 +1,3 @@
-import convertString from 'convert-string';
-import type {ConvertString} from './types';
-
-export const useStringToBytes = (str: string): number[] => {
-  return (convertString as unknown as ConvertString).stringToBytes(str);
-};
-
 export const useDate = (
   dt: Date = new Date(),
   type: string = 'all',

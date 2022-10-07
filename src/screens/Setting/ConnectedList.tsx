@@ -1,14 +1,25 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import styled from 'styled-components/native';
+import {Device} from '../../types';
+import ScanItem from './ScanItem';
+import store from '../../store';
 
 export default function 연결된장비_리스트(): JSX.Element {
+  const list = store<Device[]>(x => x?.connectDeviceList);
+
+  const count = useMemo(() => list?.length ?? 0, [list]);
+
   return (
     <Container>
       <Header>
         <Title>연결 장비</Title>
-        <Count>0개</Count>
+        <Count>{count}개</Count>
       </Header>
-      <List></List>
+      <List>
+        {list?.map(item => (
+          <ScanItem type="connect" key={item?.id} data={item} />
+        ))}
+      </List>
     </Container>
   );
 }

@@ -37,7 +37,6 @@ const Container = styled.View`
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 10px;
 `;
 type SymbolWebReturn = {source: string; resizeMode: string};
 const SymbolWeb = styled.Image.attrs(
@@ -49,7 +48,6 @@ const SymbolWeb = styled.Image.attrs(
   width: 100%;
   max-width: 400px;
   height: 100%;
-  margin-bottom: 20px;
 `;
 const MenuBtn = styled.TouchableOpacity`
   background-color: #00000000;

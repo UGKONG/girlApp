@@ -12,6 +12,7 @@ import SideMenu from './components/SideMenu';
 import LoginModal from './components/LoginModal';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {AsyncStorageError, AsyncStorageResult} from './types';
 
 const os = Platform.OS;
 
@@ -35,14 +36,23 @@ export default function App(): JSX.Element {
   };
 
   // 자동 로그인 체크
-  type AsyncStorageError = Error | null | undefined;
-  type AsyncStorageResult = string | null | undefined;
   const autoLoginCheck = () => {
     AsyncStorage.getItem(
       'isLogin',
       (err: AsyncStorageError, result: AsyncStorageResult): void => {
         if (err || !result) return;
-        dispatch('isLogin', JSON.parse(result));
+        dispatch('isLogin', JSON.parse(result as string));
+      },
+    );
+  };
+
+  // 연결된 디바이스 리스트 확인
+  const getConnectedDeviceList = () => {
+    AsyncStorage.getItem(
+      'connectDeviceList',
+      (err: AsyncStorageError, result: AsyncStorageResult) => {
+        if (err || !result) AsyncStorage.setItem('connectDeviceList', '[]');
+        dispatch('connectDeviceList', JSON.parse(result as string));
       },
     );
   };
@@ -79,6 +89,9 @@ export default function App(): JSX.Element {
 
   // 자동로그인체크
   useEffect(autoLoginCheck, [dispatch]);
+
+  // 연결된 디바이스 리스트 확인
+  useEffect(getConnectedDeviceList, [dispatch]);
 
   return (
     <NavigationContainer ref={navigationRef}>

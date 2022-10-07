@@ -1,27 +1,17 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, {useEffect, useState} from 'react';
-import BleManager from 'react-native-ble-manager';
 import ScanList from './ScanList';
-import {ConnectedDevice, User} from '../../types';
+import {User} from '../../types';
 import BluetoothSwitch from './BluetoothSwitch';
 import ConnectedList from './ConnectedList';
 import Container from '../../components/Container';
 import store from '../../store';
-import {Button} from 'react-native';
+import useBluetoothInit from '../../../hooks/useBluetoothInit';
 
 export default function 디바이스_설정(): JSX.Element {
   const dispatch = store(x => x?.setState);
   const isLogin = store<null | User>(x => x?.isLogin);
   const [state, setState] = useState<boolean>(true);
-  const [connectedDevice, setConnectedDevice] = useState<ConnectedDevice>(null);
-
-  // 시작하기
-  const init = (): void => {
-    BleManager.enableBluetooth()
-      .then(() => setState(true))
-      .catch(() => setState(false))
-      .finally(() => BleManager.start({showAlert: false}));
-  };
+  useBluetoothInit();
 
   useEffect((): void => {
     if (!isLogin) {
@@ -30,19 +20,11 @@ export default function 디바이스_설정(): JSX.Element {
     }
   }, [dispatch, isLogin]);
 
-  useEffect((): void => {
-    init();
-  }, []);
-
   return (
     <Container.Scroll>
       <BluetoothSwitch state={state} setState={setState} />
       <ConnectedList />
-      <ScanList
-        state={state}
-        setState={setState}
-        setConnectedDevice={setConnectedDevice}
-      />
+      <ScanList state={state} setState={setState} />
     </Container.Scroll>
   );
 }

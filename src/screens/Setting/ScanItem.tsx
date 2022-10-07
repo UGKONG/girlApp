@@ -1,143 +1,197 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react-hooks/rules-of-hooks */
-/* eslint-disable no-shadow */
 /* eslint-disable curly */
 
-import React, {useCallback, useMemo} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {Alert} from 'react-native';
 import styled from 'styled-components/native';
 import BleManager from 'react-native-ble-manager';
-import {useStringToBytes} from '../../functions';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import type {PeripheralInfo} from 'react-native-ble-manager';
 import type {
-  ConnectedDevice,
+  AsyncStorageError,
+  AsyncStorageResult,
   Device,
   SetState,
-  SendDataInfo,
 } from '../../types';
 import store from '../../store';
+// import {bluetoothConnect} from '../../../hooks/bluetoothConnect';
+import AntIcon from 'react-native-vector-icons/AntDesign';
+import bluetoothWrite from '../../../hooks/bluetoothWrite';
 
 type Props = {
   data: Device;
-  setConnectedDevice: SetState<ConnectedDevice>;
+  type: 'scan' | 'connect';
+  setList?: SetState<Device[]>;
 };
 export default function 스캔된장비_아이템({
   data,
-  setConnectedDevice,
+  type,
+  setList,
 }: Props): JSX.Element {
   const dispatch = store(x => x?.setState);
+  const activeDevice = store(x => x?.activeDevice);
+  const [connectDevice, setConnectDevice] = useState<null | PeripheralInfo>(
+    null,
+  );
+  const serviceUUID: string = 'FE60';
+  const notificationUUID: string = 'FE62';
 
-  // 장비 클릭
-  const onClick = (): void => {
-    BleManager.connect(data?.id)
-      .then(() => {
-        setConnectedDevice(data ?? null);
-        sendValidate(data);
-        getData({
-          id: data?.id,
-          serviceUUID: 'FE60',
-          characteristicUUID: 'FE61',
-        });
-      })
-      .catch((err: Error) => {
-        setConnectedDevice(null);
-        Alert.alert('연결에 실패하였습니다.');
-        console.log(err);
-      });
+  // 전역 State 등록
+  const globalStateSave = (pushData: PeripheralInfo) => {
+    AsyncStorage.getItem(
+      'connectDeviceList',
+      (err: AsyncStorageError, result: AsyncStorageResult) => {
+        if (err && !result) return;
+
+        let parse = JSON.parse(result as string);
+        let clean = new Set(parse);
+        let copy = [...clean] as Device[];
+        let find = copy?.find((x: Device) => x?.id === pushData?.id);
+
+        if (!find) {
+          copy.push(pushData);
+          AsyncStorage.setItem('connectDeviceList', JSON.stringify(copy));
+          dispatch('connectDeviceList', copy);
+        }
+
+        if (setList) {
+          setList(prev => {
+            let filter = prev?.filter(x => x?.id !== data?.id);
+            return filter;
+          });
+        }
+      },
+    );
   };
 
-  // 데이터 수신
-  const getData = useCallback((data: SendDataInfo): void => {
-    BleManager.retrieveServices(data?.id).finally(() => {
-      console.log('Notification 시도');
-      BleManager.startNotification(
-        data?.id,
-        data?.serviceUUID,
-        data?.characteristicUUID,
-      )
-        .then(() => {
-          console.log('Notification 성공 ->');
-        })
-        .catch(err => {
-          console.log('Notification 실패 ->', err);
-        });
-    });
-  }, []);
+  // 장비 연결
+  const connect = async (): Promise<boolean> => {
+    if (activeDevice) {
+      Alert.alert('이미 연결되어 있습니다.');
+      return false;
+    }
 
-  // 데이터 송신
-  const sendData = useCallback((data: SendDataInfo) => {
-    let tryCount: number = 0;
+    try {
+      console.log('connect 시도');
+      await BleManager.connect(data?.id);
+      console.log('connect 성공');
 
-    const write = (thisFn?: any) => {
-      console.log('Write 시도');
-      tryCount += 1;
-      BleManager.writeWithoutResponse(
-        data?.id,
-        data?.serviceUUID,
-        data?.characteristicUUID,
-        data?.value,
-      )
-        .then(() => {
-          console.log('Write 성공');
-          // getData(data);
-        })
-        .catch(err => {
-          console.log('Write 실패', err);
-          if (tryCount < 2) {
-            console.log('Write 재시도');
-            thisFn();
-          }
-        });
-    };
+      console.log('retrieveServices 시도');
+      const res = await BleManager.retrieveServices(data?.id);
+      console.log('retrieveServices 성공');
 
-    BleManager.retrieveServices(data?.id).finally(() => write(write));
-  }, []);
+      console.log('startNotification 시도');
+      BleManager.startNotification(res?.id, serviceUUID, notificationUUID);
+      console.log('startNotification 성공');
 
-  // 데이터 송신 전 Validate
-  const sendValidate = useCallback(
-    (deviceInfo: Device): void => {
-      // validation
-      if (!deviceInfo) {
-        console.log('deviceInfo is null!!');
-        return;
-      }
-      if (!deviceInfo?.advertising?.serviceUUIDs?.length) {
-        console.log('ServiceUUIDs 배열이 비었습니다.');
-        return;
-      }
+      if (!res?.id || !res?.name) return;
 
-      // 선택한 디바이스 정보 & 전송 정보
-      let id = deviceInfo?.id;
-      let serviceUUID: string = 'FE60';
-      let characteristicUUID: string = 'FE61';
-      let value: number[] = useStringToBytes('0x40');
+      console.log('globalStateSave 시도');
+      globalStateSave(res);
+      console.log('globalStateSave 성공');
 
-      // Write
-      sendData({id, serviceUUID, characteristicUUID, value});
-    },
-    [sendData],
-  );
+      console.log('dispatch 시도');
+      setConnectDevice(res);
+      console.log('dispatch 성공');
+      // dispatch('activeDevice', {
+      //   id: data?.id,
+      //   name: data?.name,
+      //   battery: 0,
+      //   detail: data,
+      // });
 
+      return true;
+      // bluetoothWrite({type: 'battery', id: data?.id, value: [0x30]});
+    } catch {
+      setConnectDevice(null);
+      Alert.alert('다시 시도해주세요.');
+      return false;
+    }
+
+    // bluetoothConnect(data?.id).then(res => {
+    //   if (!res) return Alert.alert('다시 시도해주세요.');
+
+    //   if (!res?.id || !res?.name) return;
+    //   globalStateSave(res);
+    //   dispatch('activeDevice', {
+    //     id: data?.id,
+    //     name: data?.name,
+    //     battery: 0,
+    //     detail: data,
+    //   });
+    //   Alert.alert('연결되었습니다.');
+
+    //   bluetoothWrite({type: 'battery', id: data?.id, value: [0x30]});
+    // });
+  };
+
+  // 장비 삭제
+  const deleteItem = (): void => {
+    AsyncStorage.getItem(
+      'connectDeviceList',
+      (err: AsyncStorageError, result: AsyncStorageResult) => {
+        if (err && !result) return;
+
+        let parse = JSON.parse(result as string);
+        let clean = new Set(parse);
+        let copy = [...clean] as Device[];
+        let filter = copy?.filter((x: Device) => x?.id !== data?.id);
+
+        AsyncStorage.setItem('connectDeviceList', JSON.stringify(filter));
+        dispatch('connectDeviceList', filter);
+      },
+    );
+  };
+
+  // 리스트에 출력될 이름 메모
   const title = useMemo((): string => {
     let result = data?.name ?? '';
     if (result) result += ` (${data?.id})`;
     return result;
   }, [data?.id, data?.name]);
 
+  // 연결 시 작동
+  useEffect(() => {
+    if (!connectDevice) return;
+
+    dispatch('activeDevice', {
+      id: connectDevice?.id,
+      name: connectDevice?.name,
+      battery: 0,
+      detail: connectDevice,
+    });
+    Alert.alert('연결되었습니다.');
+  }, [connectDevice, dispatch]);
+
   return (
-    <Container onPress={onClick}>
-      <ContainerText>{title}</ContainerText>
+    <Container>
+      <ContainerText onPress={connect}>{title}</ContainerText>
+      {type === 'connect' && <DeleteBtn onPress={deleteItem} />}
     </Container>
   );
 }
 
-const Container = styled.TouchableOpacity.attrs(() => ({
-  activeOpacity: 0.7,
-}))`
+const Container = styled.View`
   background: #f19eb4;
-  padding: 12px;
+  padding: 0;
   margin-bottom: 10px;
   border-radius: 6px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
 `;
 const ContainerText = styled.Text`
   color: #fff;
+  flex: 1;
+  padding: 12px;
+  height: 46px;
+`;
+const DeleteBtn = styled(AntIcon).attrs(() => ({
+  name: 'delete',
+  size: 22,
+  color: '#f0d7d7',
+}))`
+  flex: 1;
+  max-width: 46px;
+  text-align: center;
 `;

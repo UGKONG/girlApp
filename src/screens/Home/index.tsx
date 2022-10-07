@@ -1,23 +1,29 @@
-import React, {useMemo, useRef, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import styled from 'styled-components/native';
 import Container from '../../components/Container';
 import Slider from '../../components/Slider';
 import {Alert} from 'react-native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {ParamListBase} from '@react-navigation/native';
-import SymbolMenu from './SymbolMenu';
 import store from '../../store';
 import type {SetState} from '../../types';
+import SymbolMenu from './SymbolMenu';
+import ConnectedState from './ConnectedState';
+import deviceImage from '../../../assets/images/login-device.png';
+import bluetoothWrite from '../../../hooks/bluetoothWrite';
 
 type Props = {
   navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
 };
 export default function 홈({navigation}: Props): JSX.Element {
   const isLogin = store(x => x?.isLogin);
+  const activeDevice = store(x => x?.activeDevice);
   const strengthList = useRef<number[]>([1, 2, 3, 4, 5]);
-  const durationList = useRef<number[]>([5, 10, 15, 20, 25]);
+  const durationList = useRef<number[]>([5, 6, 7, 8, 9]);
+  const modeList = useRef<number[]>([1, 2, 3, 4, 5]);
   const [strength, setStrength] = useState<number>(strengthList?.current[1]);
   const [duration, setDuration] = useState<number>(durationList?.current[2]);
+  const [mode, setMode] = useState<number>(modeList?.current[0]);
   type RemoteList = {
     name: string;
     list: number[];
@@ -27,6 +33,13 @@ export default function 홈({navigation}: Props): JSX.Element {
   };
   const remoteList = useMemo(
     (): RemoteList[] => [
+      {
+        name: '모드',
+        list: modeList?.current,
+        color: '#e46b8b',
+        value: mode,
+        setValue: setMode,
+      },
       {
         name: '에너지',
         list: strengthList?.current,
@@ -42,7 +55,7 @@ export default function 홈({navigation}: Props): JSX.Element {
         setValue: setDuration,
       },
     ],
-    [duration, strength],
+    [duration, mode, strength],
   );
 
   // 루나 시작
@@ -57,55 +70,96 @@ export default function 홈({navigation}: Props): JSX.Element {
     Alert.alert(str);
   };
 
+  // 에너지 변경 시
+  useEffect(() => {
+    if (activeDevice) {
+      bluetoothWrite({
+        type: 'power',
+        id: activeDevice?.id,
+        value: [0x50 + strength],
+      });
+    }
+  }, [activeDevice, strength]);
+  // 타이머 변경 시
+  useEffect(() => {
+    if (activeDevice) {
+      bluetoothWrite({
+        type: 'timer',
+        id: activeDevice?.id,
+        value: [0x80 + duration],
+      });
+    }
+  }, [activeDevice, duration]);
+  // 모드 변경 시
+  useEffect(() => {
+    if (activeDevice) {
+      bluetoothWrite({
+        type: 'mode',
+        id: activeDevice?.id,
+        value: [0x70 + mode],
+      });
+    }
+  }, [activeDevice, mode]);
+
   return (
     <Container.View>
       <SymbolMenu navigation={navigation} />
-      <RemoteContainer>
-        {remoteList?.map(item => (
-          <Row key={item?.name}>
-            <RowTitle>{item?.name}</RowTitle>
-            <SliderContainer>
-              <SliderTextWrap>
-                {item?.list?.map((txt, i) => (
-                  <SliderText
-                    onPress={() => item?.setValue(txt)}
-                    key={item?.name + txt}
-                    count={item?.list?.length}
-                    idx={i}
-                    active={Number(txt) === item?.value}
-                    ismargin={txt >= 10}>
-                    {txt}
-                  </SliderText>
-                ))}
-              </SliderTextWrap>
-              <Slider
-                step={listStep(item?.list)}
-                min={listFirst(item?.list)}
-                max={listLast(item?.list)}
-                color={item?.color}
-                value={item?.value}
-                setValue={item?.setValue}
-              />
-            </SliderContainer>
-          </Row>
-        ))}
-        <Row>
-          {isLogin ? (
-            <>
-              <SubmitBtn onPress={startLuna}>
-                <SubmitBtnText>루나 시작</SubmitBtnText>
-              </SubmitBtn>
-              <SubmitBtn onPress={stopLuna}>
-                <SubmitBtnText>정지</SubmitBtnText>
-              </SubmitBtn>
-            </>
-          ) : (
-            <LoginDescription>
-              로그인을 해야 사용이 가능합니다.
-            </LoginDescription>
-          )}
-        </Row>
-      </RemoteContainer>
+      {activeDevice ? (
+        <>
+          <ConnectedState />
+          <RemoteContainer>
+            {remoteList?.map(item => (
+              <Row key={item?.name}>
+                <RowTitle>{item?.name}</RowTitle>
+                <SliderContainer>
+                  <SliderTextWrap>
+                    {item?.list?.map((txt, i) => (
+                      <SliderText
+                        onPress={() => item?.setValue(txt)}
+                        key={item?.name + txt}
+                        count={item?.list?.length}
+                        idx={i}
+                        active={Number(txt) === item?.value}
+                        ismargin={txt >= 10}>
+                        {txt}
+                      </SliderText>
+                    ))}
+                  </SliderTextWrap>
+                  <Slider
+                    step={listStep(item?.list)}
+                    min={listFirst(item?.list)}
+                    max={listLast(item?.list)}
+                    color={item?.color}
+                    value={item?.value}
+                    setValue={item?.setValue}
+                  />
+                </SliderContainer>
+              </Row>
+            ))}
+            <Row>
+              {isLogin ? (
+                <>
+                  <SubmitBtn onPress={startLuna}>
+                    <SubmitBtnText>루나 시작</SubmitBtnText>
+                  </SubmitBtn>
+                  <SubmitBtn onPress={stopLuna}>
+                    <SubmitBtnText>정지</SubmitBtnText>
+                  </SubmitBtn>
+                </>
+              ) : (
+                <LoginDescription>
+                  로그인을 해야 사용이 가능합니다.
+                </LoginDescription>
+              )}
+            </Row>
+          </RemoteContainer>
+        </>
+      ) : (
+        <DeviceUndefined onPress={() => navigation.navigate('setting')}>
+          <DeviceUndefinedBg />
+          <DeviceUndefinedText>장비를 연결해주세요.</DeviceUndefinedText>
+        </DeviceUndefined>
+      )}
     </Container.View>
   );
 }
@@ -188,4 +242,26 @@ const LoginDescription = styled.Text`
   /* color: #e87ea7; */
   color: #ffffff;
   padding: 20px 0;
+`;
+const DeviceUndefinedBg = styled.ImageBackground.attrs(() => ({
+  source: deviceImage,
+  resizeMode: 'contain',
+}))`
+  position: absolute;
+  right: -20px;
+  bottom: 0;
+  width: 250px;
+  height: 250px;
+`;
+const DeviceUndefined = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 1,
+}))`
+  width: 100%;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+`;
+const DeviceUndefinedText = styled.Text`
+  font-size: 18px;
+  color: #7e7e7e;
 `;
