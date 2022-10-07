@@ -2,6 +2,7 @@ import createStore from 'zustand';
 import type {Store} from './types';
 
 export default createStore<Store>(set => ({
+  isBluetoothReady: false,
   bluetoothDataRequestType: null,
   activeDevice: null,
   isModal: false,

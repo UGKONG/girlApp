@@ -19,6 +19,7 @@ export type BluetoothDataRequestType =
   | 'mode'
   | 'timer';
 export type Store = {
+  isBluetoothReady: boolean;
   bluetoothDataRequestType: BluetoothDataRequestType;
   activeDevice: {
     id: string;

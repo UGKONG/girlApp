@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import styled from 'styled-components/native';
 import Container from '../../components/Container';
@@ -16,6 +17,8 @@ type Props = {
   navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
 };
 export default function 홈({navigation}: Props): JSX.Element {
+  const bleWrite = bluetoothWrite();
+  const isBluetoothReady = store(x => x?.isBluetoothReady);
   const isLogin = store(x => x?.isLogin);
   const activeDevice = store(x => x?.activeDevice);
   const strengthList = useRef<number[]>([1, 2, 3, 4, 5]);
@@ -72,34 +75,36 @@ export default function 홈({navigation}: Props): JSX.Element {
 
   // 에너지 변경 시
   useEffect(() => {
-    if (activeDevice) {
-      bluetoothWrite({
+    if (isBluetoothReady && activeDevice) {
+      bleWrite({
         type: 'power',
         id: activeDevice?.id,
         value: [0x50 + strength],
       });
     }
-  }, [activeDevice, strength]);
+  }, [strength]);
+
   // 타이머 변경 시
   useEffect(() => {
-    if (activeDevice) {
-      bluetoothWrite({
+    if (isBluetoothReady && activeDevice) {
+      bleWrite({
         type: 'timer',
         id: activeDevice?.id,
         value: [0x80 + duration],
       });
     }
-  }, [activeDevice, duration]);
+  }, [duration]);
+
   // 모드 변경 시
   useEffect(() => {
-    if (activeDevice) {
-      bluetoothWrite({
+    if (isBluetoothReady && activeDevice) {
+      bleWrite({
         type: 'mode',
         id: activeDevice?.id,
         value: [0x70 + mode],
       });
     }
-  }, [activeDevice, mode]);
+  }, [mode]);
 
   return (
     <Container.View>

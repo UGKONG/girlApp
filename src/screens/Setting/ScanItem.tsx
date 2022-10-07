@@ -1,7 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable curly */
 
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {Alert} from 'react-native';
 import styled from 'styled-components/native';
 import BleManager from 'react-native-ble-manager';
@@ -14,7 +15,6 @@ import type {
   SetState,
 } from '../../types';
 import store from '../../store';
-// import {bluetoothConnect} from '../../../hooks/bluetoothConnect';
 import AntIcon from 'react-native-vector-icons/AntDesign';
 import bluetoothWrite from '../../../hooks/bluetoothWrite';
 
@@ -28,6 +28,7 @@ export default function 스캔된장비_아이템({
   type,
   setList,
 }: Props): JSX.Element {
+  const bleWrite = bluetoothWrite();
   const dispatch = store(x => x?.setState);
   const activeDevice = store(x => x?.activeDevice);
   const [connectDevice, setConnectDevice] = useState<null | PeripheralInfo>(
@@ -72,57 +73,21 @@ export default function 스캔된장비_아이템({
     }
 
     try {
-      console.log('connect 시도');
       await BleManager.connect(data?.id);
-      console.log('connect 성공');
-
-      console.log('retrieveServices 시도');
       const res = await BleManager.retrieveServices(data?.id);
-      console.log('retrieveServices 성공');
-
-      console.log('startNotification 시도');
       BleManager.startNotification(res?.id, serviceUUID, notificationUUID);
-      console.log('startNotification 성공');
 
       if (!res?.id || !res?.name) return false;
 
-      console.log('globalStateSave 시도');
       globalStateSave(res);
-      console.log('globalStateSave 성공');
-
-      console.log('dispatch 시도');
       setConnectDevice(res);
-      console.log('dispatch 성공');
-      // dispatch('activeDevice', {
-      //   id: data?.id,
-      //   name: data?.name,
-      //   battery: 0,
-      //   detail: data,
-      // });
 
       return true;
-      // bluetoothWrite({type: 'battery', id: data?.id, value: [0x30]});
     } catch {
       setConnectDevice(null);
       Alert.alert('다시 시도해주세요.');
       return false;
     }
-
-    // bluetoothConnect(data?.id).then(res => {
-    //   if (!res) return Alert.alert('다시 시도해주세요.');
-
-    //   if (!res?.id || !res?.name) return;
-    //   globalStateSave(res);
-    //   dispatch('activeDevice', {
-    //     id: data?.id,
-    //     name: data?.name,
-    //     battery: 0,
-    //     detail: data,
-    //   });
-    //   Alert.alert('연결되었습니다.');
-
-    //   bluetoothWrite({type: 'battery', id: data?.id, value: [0x30]});
-    // });
   };
 
   // 장비 삭제
@@ -152,7 +117,7 @@ export default function 스캔된장비_아이템({
 
   // 연결 시 작동
   useEffect(() => {
-    if (!connectDevice) return;
+    if (!connectDevice || !data?.id) return;
 
     dispatch('activeDevice', {
       id: connectDevice?.id,
@@ -160,8 +125,10 @@ export default function 스캔된장비_아이템({
       battery: 0,
       detail: connectDevice,
     });
+
     Alert.alert('연결되었습니다.');
-  }, [connectDevice, dispatch]);
+    bleWrite({type: 'battery', id: data?.id, value: [0x30]});
+  }, [connectDevice, data?.id]);
 
   return (
     <Container>

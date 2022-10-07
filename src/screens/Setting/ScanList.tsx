@@ -11,7 +11,6 @@ import BluetoothSerial from 'react-native-bluetooth-serial-next';
 import ScanItem from './ScanItem';
 import store from '../../store';
 import type {Device, SetState} from '../../types';
-import bluetoothDataResponse from '../../../hooks/bluetoothDataResponse';
 
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
@@ -94,18 +93,11 @@ export default function 검색된장비_리스트({
   useEffect((): (() => void) => {
     bleManagerEmitter.addListener('BleManagerDiscoverPeripheral', scanning);
     bleManagerEmitter.addListener('BleManagerStopScan', stopScan);
-    bleManagerEmitter.addListener(
-      'BleManagerDidUpdateValueForCharacteristic',
-      bluetoothDataResponse,
-    );
     return () => {
       bleManagerEmitter.removeAllListeners('BleManagerDiscoverPeripheral');
       bleManagerEmitter.removeAllListeners('BleManagerStopScan');
-      bleManagerEmitter.removeAllListeners(
-        'BleManagerDidUpdateValueForCharacteristic',
-      );
     };
-  }, [startScan, stopScan]);
+  }, []);
 
   return (
     <Container>

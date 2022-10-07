@@ -1,6 +1,14 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable curly */
 import React, {useEffect} from 'react';
-import {Platform, StatusBar, BackHandler, Alert} from 'react-native';
+import {
+  Platform,
+  StatusBar,
+  BackHandler,
+  Alert,
+  NativeModules,
+  NativeEventEmitter,
+} from 'react-native';
 import {
   NavigationContainer,
   useNavigationContainerRef,
@@ -13,14 +21,24 @@ import LoginModal from './components/LoginModal';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {AsyncStorageError, AsyncStorageResult} from './types';
+import bluetoothInit from '../hooks/bluetoothInit';
+import bluetoothWrite from '../hooks/bluetoothWrite';
+import bluetoothDataResponse from '../hooks/bluetoothDataResponse';
 
 const os = Platform.OS;
+const BleManagerModule = NativeModules.BleManager;
+const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
 export default function App(): JSX.Element {
+  const bleInit = bluetoothInit();
+  const bleWrite = bluetoothWrite();
+  const bleResponse = bluetoothDataResponse();
   const navigationRef = useNavigationContainerRef();
   const dispatch = store(x => x?.setState);
+  const activeDevice = store(x => x?.activeDevice);
+  const isBluetoothReady = store(x => x?.isBluetoothReady);
   const isModal = store<boolean>(x => x?.isModal);
-
+  useEffect(bleInit, []);
   // 안드로이드 위치 권한 요청
   const androidLocationRequest = (fn: any): void => {
     request(PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION).then(x => {
@@ -63,6 +81,11 @@ export default function App(): JSX.Element {
     if (os === 'ios') iosLocationRequest(iosLocationRequest);
   }, []);
 
+  // 블루투스 Init
+  // useEffect(() => {
+  //   bleInit();
+  // }, []);
+
   // 안드로이드 뒤로가기 버튼 클릭
   useEffect((): (() => void) => {
     const backBtnClick = (): boolean => {
@@ -92,6 +115,46 @@ export default function App(): JSX.Element {
 
   // 연결된 디바이스 리스트 확인
   useEffect(getConnectedDeviceList, [dispatch]);
+
+  // Response 이벤트 등록
+  useEffect(() => {
+    bleManagerEmitter.removeAllListeners(
+      'BleManagerDidUpdateValueForCharacteristic',
+    );
+    bleManagerEmitter.addListener(
+      'BleManagerDidUpdateValueForCharacteristic',
+      bleResponse,
+    );
+    console.log('-------- App Loaded --------', new Date());
+
+    return () => {
+      bleManagerEmitter.removeAllListeners(
+        'BleManagerDidUpdateValueForCharacteristic',
+      );
+    };
+  }, []);
+
+  //
+  useEffect(() => {
+    if (!activeDevice || !isBluetoothReady) return;
+
+    bleWrite({
+      type: 'battery',
+      id: activeDevice?.id,
+      value: [0x30],
+    });
+    // let interval = setInterval(() => {
+    //   bleWrite({
+    //     type: 'battery',
+    //     id: activeDevice?.id,
+    //     value: [0x30],
+    //   });
+    // }, 10000);
+
+    // return () => {
+    //   clearInterval(interval);
+    // };
+  }, []);
 
   return (
     <NavigationContainer ref={navigationRef}>
