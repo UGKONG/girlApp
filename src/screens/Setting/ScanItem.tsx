@@ -84,7 +84,7 @@ export default function 스캔된장비_아이템({
       BleManager.startNotification(res?.id, serviceUUID, notificationUUID);
       console.log('startNotification 성공');
 
-      if (!res?.id || !res?.name) return;
+      if (!res?.id || !res?.name) return false;
 
       console.log('globalStateSave 시도');
       globalStateSave(res);
