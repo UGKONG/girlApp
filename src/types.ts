@@ -10,28 +10,43 @@ export type User = {
 export type SetState<T> = Dispatch<SetStateAction<T>>;
 export type ConnectedDevice = {id: string; name: string};
 export type BluetoothDataRequestType =
-  | null
   | 'batteryV'
+  | 'init'
   | 'battery'
   | 'off'
   | 'on'
   | 'power'
   | 'mode'
   | 'timer';
+export type BluetoothDataRequest = {
+  type: BluetoothDataRequestType;
+  isAuto?: boolean;
+};
+export type ActiveDevice = {
+  id: string;
+  name: string;
+  battery: number;
+  detail: Peripheral;
+};
+export type MyDevice = {
+  id: string;
+  name: string;
+};
+export type RemoteState = {
+  mode: number;
+  power: number;
+  timer: number;
+};
 export type Store = {
+  remoteState: RemoteState | null;
   isBluetoothReady: boolean;
-  bluetoothDataRequestType: BluetoothDataRequestType;
-  activeDevice: {
-    id: string;
-    name: string;
-    battery: number;
-    detail: Device;
-  } | null;
+  bluetoothDataRequest: BluetoothDataRequest | null;
+  activeDevice: ActiveDevice | null;
   isModal: boolean;
   isMenu: boolean;
   isLogin: null | User;
   loginRequired: boolean;
-  connectDeviceList: Device[];
+  myDeviceList: MyDevice[];
   possibleDeviceName: string;
   setState: (type: string, payload: any) => void;
 };

@@ -7,10 +7,10 @@ export default function ConnectedState() {
   const data = store(x => x?.activeDevice);
 
   const battery = useMemo<{color: String; percent: number}>(() => {
-    let percent: number | undefined = data?.battery;
-    if (!percent) return {color: '#000', percent: 0};
-
     let color: string = '#00b200';
+    if (!data?.battery) return {color: '#000', percent: 0};
+    let percent: number = data?.battery;
+    if (!percent) return {color: '#000', percent: 0};
 
     if (percent <= 20) color = '#ff8000';
     if (percent <= 10) color = '#ff0000';

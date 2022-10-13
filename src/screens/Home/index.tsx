@@ -1,110 +1,133 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import React, {useEffect, useMemo} from 'react';
+import {Alert} from 'react-native';
 import styled from 'styled-components/native';
 import Container from '../../components/Container';
 import Slider from '../../components/Slider';
-import {Alert} from 'react-native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {ParamListBase} from '@react-navigation/native';
 import store from '../../store';
-import type {SetState} from '../../types';
 import SymbolMenu from './SymbolMenu';
 import ConnectedState from './ConnectedState';
 import deviceImage from '../../../assets/images/login-device.png';
-import bluetoothWrite from '../../../hooks/bluetoothWrite';
+import useBluetoothWrite from '../../../hooks/useBluetoothWrite';
+import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import type {ParamListBase} from '@react-navigation/native';
+import type {SetState} from '../../types';
+
+export const modeList: number[] = [1, 2, 3, 4, 5];
+export const powerList: number[] = [1, 2, 3, 4, 5];
+export const timerList: number[] = [5, 6, 7, 8, 9];
 
 type Props = {
   navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
 };
 export default function 홈({navigation}: Props): JSX.Element {
-  const bleWrite = bluetoothWrite();
+  const bleWrite = useBluetoothWrite();
+  const dispatch = store(x => x?.setState);
   const isBluetoothReady = store(x => x?.isBluetoothReady);
   const isLogin = store(x => x?.isLogin);
   const activeDevice = store(x => x?.activeDevice);
-  const strengthList = useRef<number[]>([1, 2, 3, 4, 5]);
-  const durationList = useRef<number[]>([5, 6, 7, 8, 9]);
-  const modeList = useRef<number[]>([1, 2, 3, 4, 5]);
-  const [strength, setStrength] = useState<number>(strengthList?.current[1]);
-  const [duration, setDuration] = useState<number>(durationList?.current[2]);
-  const [mode, setMode] = useState<number>(modeList?.current[0]);
+  const remoteState = store(x => x?.remoteState);
+
   type RemoteList = {
     name: string;
     list: number[];
     color: string;
-    value: number;
+    value: number | undefined;
     setValue: SetState<number>;
   };
   const remoteList = useMemo(
     (): RemoteList[] => [
       {
         name: '모드',
-        list: modeList?.current,
+        list: modeList,
         color: '#e46b8b',
-        value: mode,
-        setValue: setMode,
+        value: remoteState?.mode,
+        setValue: val => {
+          dispatch('remoteState', {...remoteState, mode: val});
+        },
       },
       {
         name: '에너지',
-        list: strengthList?.current,
+        list: powerList,
         color: '#e46b8b',
-        value: strength,
-        setValue: setStrength,
+        value: remoteState?.power,
+        setValue: val => {
+          dispatch('remoteState', {...remoteState, power: val});
+        },
       },
       {
         name: '타이머 (분)',
-        list: durationList?.current,
+        list: timerList,
         color: '#e46b8b',
-        value: duration,
-        setValue: setDuration,
+        value: remoteState?.timer,
+        setValue: val => {
+          dispatch('remoteState', {...remoteState, timer: val});
+        },
       },
     ],
-    [duration, mode, strength],
+    [remoteState],
   );
 
   // 루나 시작
   const startLuna = (): void => {
-    const str: string = `에너지: ${strength}단계, 타이머: ${duration}분`;
-    Alert.alert(str);
+    const str: string = `에너지: ${remoteState?.power}단계, 타이머: ${remoteState?.timer}분`;
+    Alert.alert('LUNA', str);
+
+    if (activeDevice?.id) {
+      bleWrite({
+        type: 'on',
+        id: activeDevice?.id,
+        value: [0x42],
+      });
+    }
   };
 
   // 루나 정지
   const stopLuna = (): void => {
     const str: string = '정지되었습니다.';
-    Alert.alert(str);
+    Alert.alert('LUNA', str);
+
+    if (activeDevice?.id) {
+      bleWrite({
+        type: 'off',
+        id: activeDevice?.id,
+        value: [0x40],
+      });
+    }
   };
-
-  // 에너지 변경 시
-  useEffect(() => {
-    if (isBluetoothReady && activeDevice) {
-      bleWrite({
-        type: 'power',
-        id: activeDevice?.id,
-        value: [0x50 + strength],
-      });
-    }
-  }, [strength]);
-
-  // 타이머 변경 시
-  useEffect(() => {
-    if (isBluetoothReady && activeDevice) {
-      bleWrite({
-        type: 'timer',
-        id: activeDevice?.id,
-        value: [0x80 + duration],
-      });
-    }
-  }, [duration]);
 
   // 모드 변경 시
   useEffect(() => {
-    if (isBluetoothReady && activeDevice) {
+    if (isBluetoothReady && activeDevice && remoteState?.mode) {
       bleWrite({
         type: 'mode',
         id: activeDevice?.id,
-        value: [0x70 + mode],
+        value: [0x70 + remoteState?.mode],
       });
     }
-  }, [mode]);
+  }, [remoteState?.mode]);
+
+  // 에너지 변경 시
+  useEffect(() => {
+    if (isBluetoothReady && activeDevice && remoteState?.power) {
+      bleWrite({
+        type: 'power',
+        id: activeDevice?.id,
+        value: [0x50 + remoteState?.power],
+      });
+    }
+  }, [remoteState?.power]);
+
+  // 타이머 변경 시
+  useEffect(() => {
+    if (isBluetoothReady && activeDevice && remoteState?.timer) {
+      bleWrite({
+        type: 'timer',
+        id: activeDevice?.id,
+        value: [0x80 + remoteState?.timer],
+      });
+    }
+  }, [remoteState?.timer]);
 
   return (
     <Container.View>
@@ -135,7 +158,7 @@ export default function 홈({navigation}: Props): JSX.Element {
                     min={listFirst(item?.list)}
                     max={listLast(item?.list)}
                     color={item?.color}
-                    value={item?.value}
+                    value={item?.value ?? item?.list[0]}
                     setValue={item?.setValue}
                   />
                 </SliderContainer>

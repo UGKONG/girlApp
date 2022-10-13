@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable curly */
 import React, {useEffect} from 'react';
@@ -20,25 +21,24 @@ import SideMenu from './components/SideMenu';
 import LoginModal from './components/LoginModal';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {AsyncStorageError, AsyncStorageResult} from './types';
-import bluetoothInit from '../hooks/bluetoothInit';
-import bluetoothWrite from '../hooks/bluetoothWrite';
-import bluetoothDataResponse from '../hooks/bluetoothDataResponse';
+import useBluetoothInit from '../hooks/useBluetoothInit';
+import useBluetoothWrite from '../hooks/useBluetoothWrite';
+import useBluetoothDataResponse from '../hooks/useBluetoothDataResponse';
 
 const os = Platform.OS;
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
 export default function App(): JSX.Element {
-  const bleInit = bluetoothInit();
-  const bleWrite = bluetoothWrite();
-  const bleResponse = bluetoothDataResponse();
+  const bleInit = useBluetoothInit();
+  const bleWrite = useBluetoothWrite();
+  const bleResponse = useBluetoothDataResponse();
   const navigationRef = useNavigationContainerRef();
   const dispatch = store(x => x?.setState);
   const activeDevice = store(x => x?.activeDevice);
   const isBluetoothReady = store(x => x?.isBluetoothReady);
   const isModal = store<boolean>(x => x?.isModal);
-  useEffect(bleInit, []);
+
   // 안드로이드 위치 권한 요청
   const androidLocationRequest = (fn: any): void => {
     request(PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION).then(x => {
@@ -54,48 +54,29 @@ export default function App(): JSX.Element {
   };
 
   // 자동 로그인 체크
-  const autoLoginCheck = () => {
-    AsyncStorage.getItem(
-      'isLogin',
-      (err: AsyncStorageError, result: AsyncStorageResult): void => {
-        if (err || !result) return;
-        dispatch('isLogin', JSON.parse(result as string));
-      },
-    );
+  const autoLoginCheck = async () => {
+    const isLogin = await AsyncStorage.getItem('isLogin');
+    dispatch('isLogin', JSON.parse(isLogin ?? 'null'));
   };
 
   // 연결된 디바이스 리스트 확인
-  const getConnectedDeviceList = () => {
-    AsyncStorage.getItem(
-      'connectDeviceList',
-      (err: AsyncStorageError, result: AsyncStorageResult) => {
-        if (err || !result) AsyncStorage.setItem('connectDeviceList', '[]');
-        dispatch('connectDeviceList', JSON.parse(result as string));
-      },
-    );
+  const getConnectedDeviceList = async (): Promise<void> => {
+    const local = await AsyncStorage.getItem('myDeviceList');
+    const value: string = local || '[]';
+    if (!local) AsyncStorage.setItem('myDeviceList', value);
+    dispatch('myDeviceList', JSON.parse(value));
   };
 
-  // 권한 요청
-  useEffect((): void => {
-    if (os === 'android') androidLocationRequest(androidLocationRequest);
-    if (os === 'ios') iosLocationRequest(iosLocationRequest);
-  }, []);
-
-  // 블루투스 Init
-  // useEffect(() => {
-  //   bleInit();
-  // }, []);
-
-  // 안드로이드 뒤로가기 버튼 클릭
-  useEffect((): (() => void) => {
+  // 안드로이드 Back Button Click
+  const androidBackBtnClick = (): (() => boolean) => {
     const backBtnClick = (): boolean => {
       const rootState = navigationRef?.getRootState();
       const name = rootState?.routes[rootState?.routes?.length - 1]?.name;
 
       if (name === 'home') {
         Alert.alert('NUNA', '앱을 종료하시겠습니까?', [
+          {text: '취소'},
           {text: '확인', onPress: () => BackHandler.exitApp()},
-          {text: '취소', onPress: () => null},
         ]);
         return true;
       } else {
@@ -104,20 +85,11 @@ export default function App(): JSX.Element {
     };
 
     BackHandler.addEventListener('hardwareBackPress', backBtnClick);
+    return backBtnClick;
+  };
 
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', backBtnClick);
-    };
-  }, [navigationRef]);
-
-  // 자동로그인체크
-  useEffect(autoLoginCheck, [dispatch]);
-
-  // 연결된 디바이스 리스트 확인
-  useEffect(getConnectedDeviceList, [dispatch]);
-
-  // Response 이벤트 등록
-  useEffect(() => {
+  // BLE 응답 선언
+  const bleResponseFn = (): void => {
     bleManagerEmitter.removeAllListeners(
       'BleManagerDidUpdateValueForCharacteristic',
     );
@@ -126,35 +98,58 @@ export default function App(): JSX.Element {
       bleResponse,
     );
     console.log('-------- App Loaded --------', new Date());
+  };
 
-    return () => {
-      bleManagerEmitter.removeAllListeners(
-        'BleManagerDidUpdateValueForCharacteristic',
-      );
-    };
-  }, []);
+  // 권한 요청
+  const getpermission = (): void => {
+    if (os === 'android') androidLocationRequest(androidLocationRequest);
+    if (os === 'ios') iosLocationRequest(iosLocationRequest);
+  };
 
-  //
-  useEffect(() => {
-    if (!activeDevice || !isBluetoothReady) return;
-
+  // 배터리 상태 요청
+  const getBattery = (): void => {
+    if (!activeDevice) return;
     bleWrite({
       type: 'battery',
       id: activeDevice?.id,
       value: [0x30],
     });
-    // let interval = setInterval(() => {
-    //   bleWrite({
-    //     type: 'battery',
-    //     id: activeDevice?.id,
-    //     value: [0x30],
-    //   });
-    // }, 10000);
+  };
 
-    // return () => {
-    //   clearInterval(interval);
-    // };
+  // 초기 셋팅
+  useEffect(() => {
+    // 권한 요청
+    getpermission();
+    // 블루투스 Init
+    bleInit();
+    // 자동로그인체크
+    autoLoginCheck();
+    // 연결된 디바이스 리스트 확인
+    getConnectedDeviceList();
+    // Response 이벤트 등록
+    bleResponseFn();
+    // 안드로이드 뒤로가기 버튼 클릭
+    const backBtnClick = androidBackBtnClick();
+
+    // Clean Up
+    (): void => {
+      bleManagerEmitter.removeAllListeners(
+        'BleManagerDidUpdateValueForCharacteristic',
+      );
+      BackHandler.removeEventListener('hardwareBackPress', backBtnClick);
+    };
   }, []);
+
+  // 반복적으로 배터리 상태 요청
+  useEffect((): (() => void) | void => {
+    if (!activeDevice || !isBluetoothReady) return;
+    let interval: NodeJS.Timer | undefined;
+
+    clearInterval(interval);
+    // interval = setInterval(getBattery, 10000);
+
+    return (): void => clearInterval(interval);
+  }, [activeDevice?.id, isBluetoothReady]);
 
   return (
     <NavigationContainer ref={navigationRef}>

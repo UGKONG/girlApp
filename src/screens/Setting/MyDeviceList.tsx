@@ -1,29 +1,36 @@
 import React, {useMemo} from 'react';
 import styled from 'styled-components/native';
-import {Device} from '../../types';
-import ScanItem from './ScanItem';
+import {MyDevice} from '../../types';
+import DeviceItem from './DeviceItem';
 import store from '../../store';
 
-export default function 연결된장비_리스트(): JSX.Element {
-  const list = store<Device[]>(x => x?.connectDeviceList);
+export default function 내장비_리스트(): JSX.Element {
+  const list = store<MyDevice[]>(x => x?.myDeviceList);
 
   const count = useMemo(() => list?.length ?? 0, [list]);
 
   return (
     <Container>
       <Header>
-        <Title>연결 장비</Title>
+        <Title>내장비</Title>
         <Count>{count}개</Count>
       </Header>
       <List>
-        {list?.map(item => (
-          <ScanItem type="connect" key={item?.id} data={item} />
-        ))}
+        {list?.length === 0 ? (
+          <DescriptionText>등록된 내장비가 없습니다.</DescriptionText>
+        ) : (
+          list?.map(item => <DeviceItem type="my" key={item?.id} data={item} />)
+        )}
       </List>
     </Container>
   );
 }
 
+export const DescriptionText = styled.Text`
+  text-align: center;
+  padding: 20px 0;
+  color: #dc9fc5aa;
+`;
 export const Container = styled.View`
   margin-bottom: 20px;
 `;

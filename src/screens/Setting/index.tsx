@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import ScanList from './ScanList';
 import {User} from '../../types';
 import BluetoothSwitch from './BluetoothSwitch';
-import ConnectedList from './ConnectedList';
+import MyDeviceList from './MyDeviceList';
 import Container from '../../components/Container';
 import store from '../../store';
 
@@ -21,7 +21,7 @@ export default function 디바이스_설정(): JSX.Element {
   return (
     <Container.Scroll>
       <BluetoothSwitch state={state} setState={setState} />
-      <ConnectedList />
+      <MyDeviceList />
       <ScanList state={state} setState={setState} />
     </Container.Scroll>
   );

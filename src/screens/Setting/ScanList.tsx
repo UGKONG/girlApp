@@ -1,14 +1,19 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable react-native/no-inline-styles */
 /* eslint-disable curly */
-import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {NativeModules, NativeEventEmitter} from 'react-native';
+import React, {useEffect, useMemo, useState} from 'react';
+import {NativeModules, NativeEventEmitter, Alert} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import styled from 'styled-components/native';
 import BleManager from 'react-native-ble-manager';
-import {Container, Header, Title, List as _List} from './ConnectedList';
+import {
+  Container,
+  Header,
+  Title,
+  List as _List,
+  DescriptionText,
+} from './MyDeviceList';
 import BluetoothSerial from 'react-native-bluetooth-serial-next';
-import ScanItem from './ScanItem';
+import DeviceItem from './DeviceItem';
 import store from '../../store';
 import type {Device, SetState} from '../../types';
 
@@ -23,73 +28,65 @@ export default function 검색된장비_리스트({
   state,
   setState,
 }: Props): JSX.Element {
-  const possibleDeviceName = store<string>(x => x?.possibleDeviceName);
-  const connectDeviceList = store<Device[]>(x => x?.connectDeviceList);
-  const scanList = useRef<Device[]>([]);
+  const possibleDeviceName = store(x => x?.possibleDeviceName);
+  const myDeviceList = store(x => x?.myDeviceList);
   const [isScan, setIsScan] = useState<boolean>(false);
   const [list, setList] = useState<Device[]>([]);
 
   // 블루투스 켜기
-  const bluetoothOn = useCallback(
-    (callback: () => void): void => {
-      setState(true);
-      BluetoothSerial.enable().then(() => {
-        setState(true);
-        callback();
-      });
-    },
-    [setState],
-  );
-
-  // 검색 시작
-  const startScan = useCallback((): void => {
-    if (!state) {
-      bluetoothOn(startScan);
-      return;
-    }
-
-    scanList.current = [];
-    setList([]);
-
-    BleManager.scan([], 5, true).then(() => {
-      setIsScan(true);
-      BleManager.getDiscoveredPeripherals();
-    });
-  }, [bluetoothOn, state]);
-
-  // 검색 리스트 정리
-  const scanListClean = useCallback((): void => {
-    const cleanList: Device[] = [...new Set(scanList.current)];
-    let result: Device[] = [];
-
-    console.log(
-      '검색된 전체 리스트',
-      cleanList?.map(x => x?.name),
-    );
-
-    cleanList?.forEach(item => {
-      let name: string = item?.name as string;
-      let validate1 = name?.indexOf(possibleDeviceName) > -1;
-      let validate2 = connectDeviceList?.find(x => x?.id === item?.id);
-
-      if (validate1 && !validate2) result.push(item);
-    });
-
-    setList(result);
-  }, [possibleDeviceName]);
-
-  const scanning = (data: Device): void => {
-    let find: Device | undefined = scanList.current.find(
-      x => x?.id === data.id,
-    );
-    if (!find && data?.name) scanList.current.push(data);
+  const bluetoothOn = async (): Promise<void> => {
+    await BluetoothSerial.enable();
+    !state && setState(true);
   };
 
-  const stopScan = useCallback((): void => {
-    setIsScan(false);
-    scanListClean();
-  }, [scanListClean]);
+  // 검색 시작
+  const startScan = async (): Promise<void> => {
+    if (!state) {
+      return Alert.alert(
+        'LUNA',
+        '블루투스가 꺼져있습니다. 블루투스를 켜시겠습니까?',
+        [{text: '취소'}, {text: '켜기', onPress: bluetoothOn}],
+        {cancelable: true},
+      );
+    }
+    setIsScan(true);
+    setList([]);
 
+    await BleManager.scan([], 5, true);
+    await BleManager.getDiscoveredPeripherals();
+  };
+
+  const scanning = (data: Device): void => {
+    // 데이터에 아이디와 이름이 있는지 확인
+    if (!data?.id || !data?.name) return;
+    console.log('스캔:', {id: data?.id, name: data?.name});
+    // 장비 이름에 LUNA가 들어가는지 확인
+    if (data?.name?.indexOf(possibleDeviceName) === -1) return;
+    // 스캔 리스트에 이미 있는 데이터는 중복 안됨
+    if (list.find(x => x?.id === data?.id)) return;
+    // 내장비로 등록된 장비는 스캔 리스트에 안나옴
+    console.log('myDeviceList', myDeviceList);
+    if (myDeviceList?.find(x => x?.id === data?.id)) return;
+
+    setList(prev => [...prev, data]);
+  };
+
+  const stopScan = (): void => {
+    setIsScan(false);
+  };
+
+  // 스캔중 텍스트
+  const scanCountText = useMemo<string>(() => {
+    if (isScan) return '검색중';
+    return list?.length + '개';
+  }, [isScan]);
+
+  // 스캔중 색상
+  const scanColor = useMemo<string>(() => {
+    return isScan ? '#ccc' : '#999';
+  }, [isScan]);
+
+  // 스캔 관련 이벤트 리스너
   useEffect((): (() => void) => {
     bleManagerEmitter.addListener('BleManagerDiscoverPeripheral', scanning);
     bleManagerEmitter.addListener('BleManagerStopScan', stopScan);
@@ -97,27 +94,30 @@ export default function 검색된장비_리스트({
       bleManagerEmitter.removeAllListeners('BleManagerDiscoverPeripheral');
       bleManagerEmitter.removeAllListeners('BleManagerStopScan');
     };
-  }, []);
+  }, [scanning]);
+
+  // 블루투스 켤때 자동 스캔 시작
+  useEffect(() => {
+    state && startScan();
+  }, [state]);
 
   return (
     <Container>
       <Header>
-        <Title>검색 장비 ({list?.length ?? 0}개)</Title>
+        <Title>검색 장비 ({scanCountText})</Title>
         <SearchBtn disabled={isScan} onPress={startScan}>
-          <SearchIcon color={isScan ? '#ccc' : '#999'} />
-          <SearchText style={{color: isScan ? '#ccc' : '#999'}}>
+          <SearchIcon color={scanColor} />
+          <SearchText style={{color: scanColor}}>
             검색{isScan ? '중' : ''}
           </SearchText>
         </SearchBtn>
       </Header>
       <List>
-        {isScan ? (
-          <DescriptionText>주변 장비를 검색중입니다.</DescriptionText>
-        ) : list?.length === 0 ? (
+        {list?.length === 0 ? (
           <DescriptionText>검색된 주변 장비가 없습니다.</DescriptionText>
         ) : (
           list?.map(item => (
-            <ScanItem
+            <DeviceItem
               type="scan"
               key={item?.id}
               data={item}
@@ -130,11 +130,6 @@ export default function 검색된장비_리스트({
   );
 }
 
-const DescriptionText = styled.Text`
-  text-align: center;
-  padding: 20px 0;
-  color: #dc9fc5aa;
-`;
 const SearchBtn = styled.TouchableOpacity`
   flex-direction: row;
   justify-content: center;

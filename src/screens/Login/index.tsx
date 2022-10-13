@@ -82,7 +82,14 @@ export default function 로그인(): JSX.Element {
         value: KakaoProfile | KakaoProfileNoneAgreement,
       ): void | PromiseLike<void> => {
         const platform = 'Kakao';
-        submit({platform, id: value?.id ?? '', name: value?.nickname ?? ''});
+        const id: string = value?.id ?? '';
+        const name: string = (value?.nickname as unknown as string) ?? '';
+
+        submit({
+          platform,
+          id,
+          name,
+        });
       },
     );
   }, [submit]);
