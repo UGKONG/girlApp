@@ -1,6 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-/* eslint-disable react-hooks/exhaustive-deps */
-import React, {useEffect, useMemo} from 'react';
+import React, {useMemo} from 'react';
 import {Alert} from 'react-native';
 import styled from 'styled-components/native';
 import Container from '../../components/Container';
@@ -12,7 +11,6 @@ import deviceImage from '../../../assets/images/login-device.png';
 import useBluetoothWrite from '../../../hooks/useBluetoothWrite';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import type {ParamListBase} from '@react-navigation/native';
-import type {SetState} from '../../types';
 
 export const modeList: number[] = [1, 2, 3, 4, 5];
 export const powerList: number[] = [1, 2, 3, 4, 5];
@@ -23,8 +21,6 @@ type Props = {
 };
 export default function 홈({navigation}: Props): JSX.Element {
   const bleWrite = useBluetoothWrite();
-  const dispatch = store(x => x?.setState);
-  const isBluetoothReady = store(x => x?.isBluetoothReady);
   const isLogin = store(x => x?.isLogin);
   const activeDevice = store(x => x?.activeDevice);
   const remoteState = store(x => x?.remoteState);
