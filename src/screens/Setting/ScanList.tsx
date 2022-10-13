@@ -35,8 +35,12 @@ export default function 검색된장비_리스트({
 
   // 블루투스 켜기
   const bluetoothOn = async (): Promise<void> => {
-    await BluetoothSerial.enable();
-    !state && setState(true);
+    try {
+      const bool = await BluetoothSerial.enable();
+      setState(bool);
+    } catch {
+      setState(false);
+    }
   };
 
   // 검색 시작
@@ -52,20 +56,24 @@ export default function 검색된장비_리스트({
     setIsScan(true);
     setList([]);
 
-    await BleManager.scan([], 5, true);
-    await BleManager.getDiscoveredPeripherals();
+    try {
+      await BleManager.scan([], 5, false);
+      await BleManager.getDiscoveredPeripherals();
+    } catch {
+      setIsScan(false);
+      Alert.alert('LUNA', '검색에 실패하였습니다. 다시 시도해주세요.');
+    }
   };
 
   const scanning = (data: Device): void => {
     // 데이터에 아이디와 이름이 있는지 확인
     if (!data?.id || !data?.name) return;
-    console.log('스캔:', {id: data?.id, name: data?.name});
+    // console.log('스캔:', {id: data?.id, name: data?.name});
     // 장비 이름에 LUNA가 들어가는지 확인
     if (data?.name?.indexOf(possibleDeviceName) === -1) return;
     // 스캔 리스트에 이미 있는 데이터는 중복 안됨
     if (list.find(x => x?.id === data?.id)) return;
     // 내장비로 등록된 장비는 스캔 리스트에 안나옴
-    console.log('myDeviceList', myDeviceList);
     if (myDeviceList?.find(x => x?.id === data?.id)) return;
 
     setList(prev => [...prev, data]);
@@ -77,9 +85,8 @@ export default function 검색된장비_리스트({
 
   // 스캔중 텍스트
   const scanCountText = useMemo<string>(() => {
-    if (isScan) return '검색중';
-    return list?.length + '개';
-  }, [isScan]);
+    return (list?.length ?? 0) + '개';
+  }, [list]);
 
   // 스캔중 색상
   const scanColor = useMemo<string>(() => {
@@ -88,6 +95,8 @@ export default function 검색된장비_리스트({
 
   // 스캔 관련 이벤트 리스너
   useEffect((): (() => void) => {
+    bleManagerEmitter.removeAllListeners('BleManagerDiscoverPeripheral');
+    bleManagerEmitter.removeAllListeners('BleManagerStopScan');
     bleManagerEmitter.addListener('BleManagerDiscoverPeripheral', scanning);
     bleManagerEmitter.addListener('BleManagerStopScan', stopScan);
     return () => {
@@ -98,8 +107,14 @@ export default function 검색된장비_리스트({
 
   // 블루투스 켤때 자동 스캔 시작
   useEffect(() => {
-    state && startScan();
+    if (!state) setIsScan(false);
   }, [state]);
+
+  // 초기화
+  useEffect(() => {
+    setIsScan(false);
+    setList([]);
+  }, []);
 
   return (
     <Container>

@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import BluetoothSerial from 'react-native-bluetooth-serial-next';
 import ScanList from './ScanList';
 import {User} from '../../types';
 import BluetoothSwitch from './BluetoothSwitch';
@@ -9,7 +10,7 @@ import store from '../../store';
 export default function 디바이스_설정(): JSX.Element {
   const dispatch = store(x => x?.setState);
   const isLogin = store<null | User>(x => x?.isLogin);
-  const [state, setState] = useState<boolean>(true);
+  const [state, setState] = useState<boolean>(false);
 
   useEffect((): void => {
     if (!isLogin) {
@@ -17,6 +18,10 @@ export default function 디바이스_설정(): JSX.Element {
       dispatch('loginRequired', true);
     }
   }, [dispatch, isLogin]);
+
+  useEffect(() => {
+    BluetoothSerial.isEnabled().then((bool: boolean) => setState(bool));
+  }, []);
 
   return (
     <Container.Scroll>

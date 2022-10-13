@@ -21,7 +21,15 @@ export default function () {
     let isAuto = bluetoothDataRequest?.isAuto;
     let val: number | string = data?.value[0];
     val = val?.toString(16);
-    console.log('<- BLE 응답: ' + type + ', value: ' + val);
+    console.log(
+      '<- BLE 응답: ' +
+        type +
+        ', value: ' +
+        val +
+        ' (오리지날: ' +
+        data?.value[0] +
+        ')',
+    );
 
     // Validate
     if (type === 'batteryV') return;

@@ -146,7 +146,7 @@ export default function App(): JSX.Element {
     let interval: NodeJS.Timer | undefined;
 
     clearInterval(interval);
-    // interval = setInterval(getBattery, 10000);
+    interval = setInterval(getBattery, 60 * 1000);
 
     return (): void => clearInterval(interval);
   }, [activeDevice?.id, isBluetoothReady]);

@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable curly */
 
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {Alert} from 'react-native';
 import Prompt from 'react-native-prompt-android';
 import styled from 'styled-components/native';
@@ -167,6 +167,8 @@ export default function 스캔된장비_아이템({
       },
     );
   };
+
+  useEffect((): void => setIsConnecting(false), []);
 
   // 리스트에 출력될 이름 메모
   const title = useMemo<string>(() => {

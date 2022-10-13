@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, {useEffect, useMemo} from 'react';
 import {Alert} from 'react-native';
@@ -33,7 +34,7 @@ export default function 홈({navigation}: Props): JSX.Element {
     list: number[];
     color: string;
     value: number | undefined;
-    setValue: SetState<number>;
+    setValue: (val: number) => void;
   };
   const remoteList = useMemo(
     (): RemoteList[] => [
@@ -42,8 +43,12 @@ export default function 홈({navigation}: Props): JSX.Element {
         list: modeList,
         color: '#e46b8b',
         value: remoteState?.mode,
-        setValue: val => {
-          dispatch('remoteState', {...remoteState, mode: val});
+        setValue: (val: number) => {
+          bleWrite({
+            type: 'mode',
+            id: activeDevice?.id as string,
+            value: [0x70 + val],
+          });
         },
       },
       {
@@ -51,8 +56,12 @@ export default function 홈({navigation}: Props): JSX.Element {
         list: powerList,
         color: '#e46b8b',
         value: remoteState?.power,
-        setValue: val => {
-          dispatch('remoteState', {...remoteState, power: val});
+        setValue: (val: number) => {
+          bleWrite({
+            type: 'power',
+            id: activeDevice?.id as string,
+            value: [0x50 + val],
+          });
         },
       },
       {
@@ -60,12 +69,16 @@ export default function 홈({navigation}: Props): JSX.Element {
         list: timerList,
         color: '#e46b8b',
         value: remoteState?.timer,
-        setValue: val => {
-          dispatch('remoteState', {...remoteState, timer: val});
+        setValue: (val: number) => {
+          bleWrite({
+            type: 'timer',
+            id: activeDevice?.id as string,
+            value: [0x80 + val],
+          });
         },
       },
     ],
-    [remoteState],
+    [remoteState, activeDevice, bleWrite],
   );
 
   // 루나 시작
@@ -96,39 +109,6 @@ export default function 홈({navigation}: Props): JSX.Element {
     }
   };
 
-  // 모드 변경 시
-  useEffect(() => {
-    if (isBluetoothReady && activeDevice && remoteState?.mode) {
-      bleWrite({
-        type: 'mode',
-        id: activeDevice?.id,
-        value: [0x70 + remoteState?.mode],
-      });
-    }
-  }, [remoteState?.mode]);
-
-  // 에너지 변경 시
-  useEffect(() => {
-    if (isBluetoothReady && activeDevice && remoteState?.power) {
-      bleWrite({
-        type: 'power',
-        id: activeDevice?.id,
-        value: [0x50 + remoteState?.power],
-      });
-    }
-  }, [remoteState?.power]);
-
-  // 타이머 변경 시
-  useEffect(() => {
-    if (isBluetoothReady && activeDevice && remoteState?.timer) {
-      bleWrite({
-        type: 'timer',
-        id: activeDevice?.id,
-        value: [0x80 + remoteState?.timer],
-      });
-    }
-  }, [remoteState?.timer]);
-
   return (
     <Container.View>
       <SymbolMenu navigation={navigation} />
@@ -153,6 +133,20 @@ export default function 홈({navigation}: Props): JSX.Element {
                       </SliderText>
                     ))}
                   </SliderTextWrap>
+                  <SliderTouchHelpWrap>
+                    {item?.list?.map((x, i) => (
+                      <SliderTouchHelp
+                        key={i}
+                        style={{
+                          opacity:
+                            item?.list?.findIndex(ii => ii === item?.value) ===
+                            i
+                              ? 0
+                              : 1,
+                        }}
+                      />
+                    ))}
+                  </SliderTouchHelpWrap>
                   <Slider
                     step={listStep(item?.list)}
                     min={listFirst(item?.list)}
@@ -292,4 +286,21 @@ const DeviceUndefined = styled.TouchableOpacity.attrs(() => ({
 const DeviceUndefinedText = styled.Text`
   font-size: 18px;
   color: #7e7e7e;
+`;
+const SliderTouchHelpWrap = styled.View`
+  position: absolute;
+  width: 100%;
+  top: 4px;
+  left: 0;
+  padding: 0 9px;
+  flex-direction: row;
+  justify-content: space-between;
+`;
+const SliderTouchHelp = styled.View`
+  min-width: 15px;
+  min-height: 15px;
+  max-width: 15px;
+  max-height: 15px;
+  border-radius: 15px;
+  background-color: #e46b8b11;
 `;
