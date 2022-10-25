@@ -9,14 +9,14 @@ export default function useSnsList(
     () => [
       {
         id: 1,
-        name: '카카오',
+        name: 'Kakao',
         img: require('../../../assets/images/loginIcon/kakao.png'),
         color: '#ebeb0f',
         onPress: kakaoLogin,
       },
       {
         id: 2,
-        name: '네이버',
+        name: 'Naver',
         img: require('../../../assets/images/loginIcon/naver.png'),
         color: '#099f09',
         onPress: naverLogin,

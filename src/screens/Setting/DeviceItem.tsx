@@ -11,7 +11,6 @@ import type {Device, MyDevice, SetState} from '../../types';
 import store from '../../store';
 import EntIcon from 'react-native-vector-icons/Entypo';
 import useBluetoothWrite from '../../../hooks/useBluetoothWrite';
-import {modeList, powerList, timerList} from '../Home';
 
 type Props = {
   data: Device | MyDevice;
@@ -66,23 +65,19 @@ export default function 스캔된장비_아이템({
       );
     } catch {
       setIsConnecting(false);
-      return Alert.alert('LUNA', '연결에 실패하였습니다. 다시 시도해주세요.');
+      let failText = '연결에 실패하였습니다. 다시 시도해주세요.';
+      return Alert.alert('LUNA', failText, undefined, {cancelable: true});
     }
+    setIsConnecting(false);
 
-    dispatch('remoteState', {
-      mode: modeList[0],
-      power: powerList[1],
-      timer: timerList[2],
-    });
     dispatch('activeDevice', {
       id: data?.id,
       name: data?.name,
       battery: 0,
       detail: data,
+      isOn: false,
     });
-    // Alert.alert('LUNA', '연결되었습니다.');
-    setIsConnecting(false);
-    bleWrite({type: 'init', id: data?.id, value: [0x30]});
+    bleWrite({type: 'init', value: [0x30]});
   };
 
   // 장비 연결 해제

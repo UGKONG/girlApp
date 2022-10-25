@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react/react-in-jsx-scope */
 import Slider from '@react-native-community/slider';
@@ -18,7 +17,7 @@ export default function CustomSlider({
   step,
   color,
   value,
-  disabled = false,
+  disabled,
   setValue,
 }: Props) {
   return (

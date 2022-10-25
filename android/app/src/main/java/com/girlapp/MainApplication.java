@@ -13,6 +13,7 @@ import com.girlapp.newarchitecture.MainApplicationReactNativeHost;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import com.dooboolab.naverlogin.RNNaverLoginPackage;
+import org.devio.rn.splashscreen.SplashScreenReactPackage;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -28,6 +29,7 @@ public class MainApplication extends Application implements ReactApplication {
           @SuppressWarnings("UnnecessaryLocalVariable")
           List<ReactPackage> packages = new PackageList(this).getPackages();
           // packages.add(new RNNaverLoginPackage());
+          // packages.add(new SplashScreenReactPackage());
           return packages;
         }
 

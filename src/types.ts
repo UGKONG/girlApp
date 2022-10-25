@@ -1,15 +1,20 @@
 import type {Dispatch, SetStateAction} from 'react';
 import type {Peripheral} from 'react-native-ble-manager';
 
+export type SnsPlatform = 'KAKAO' | 'NAVER';
+export type AppPlatform = 'LUNA' | 'PROSTA' | 'VENA';
 export type Device = Peripheral;
 export type User = {
-  USER_ID: string;
+  USER_ID?: number;
+  AUTH_ID: string;
   USER_NAME: string;
-  PLATFORM: string;
+  SNS_PLATFORM: SnsPlatform;
+  APP_PLATFORM: AppPlatform;
 };
 export type SetState<T> = Dispatch<SetStateAction<T>>;
 export type ConnectedDevice = {id: string; name: string};
 export type BluetoothDataRequestType =
+  | 'exit'
   | 'batteryV'
   | 'init'
   | 'battery'
@@ -27,6 +32,7 @@ export type ActiveDevice = {
   name: string;
   battery: number;
   detail: Peripheral;
+  isOn: boolean;
 };
 export type MyDevice = {
   id: string;
@@ -47,7 +53,7 @@ export type Store = {
   isLogin: null | User;
   loginRequired: boolean;
   myDeviceList: MyDevice[];
-  possibleDeviceName: string;
+  possibleDeviceName: AppPlatform;
   setState: (type: string, payload: any) => void;
 };
 export type LoginData = {id: string; pw: string};
@@ -60,13 +66,14 @@ export type DayObject = {
 };
 export type SnsLoginList = {
   id: number;
-  name: '카카오' | '네이버';
+  name: SnsPlatform;
   img: string;
   color: string;
   onPress: () => void;
 };
 export type SnsLoginData = {
-  platform: 'Kakao' | 'Naver';
+  appPlatform: AppPlatform;
+  snsPlatform: SnsPlatform;
   id: string;
   name: string;
 };
@@ -92,4 +99,41 @@ export type BluetoothDataResponse = {
   peripheral: string;
   service: string;
   value: any;
+};
+export type Use = {
+  USE_ID: number;
+  USER_ID: number;
+  APP_PLATFORM: AppPlatform;
+  DEVICE_ID: string;
+  DEVICE_NAME: string;
+  USE_MODE: number;
+  USE_POWER: number;
+  USE_TIMER: number;
+  USE_BATTERY: number;
+  USE_DATE: string;
+};
+export type CalendarSelectDate = {
+  [key: string]: {
+    selected?: boolean;
+    color?: string;
+    startingDay?: boolean;
+    endingDay?: boolean;
+    textColor?: string;
+    marked?: boolean;
+    dotColor?: string;
+  };
+};
+export type DateSaveForm = {
+  USER_ID: number;
+  APP_PLATFORM: AppPlatform;
+  START_DATE: string;
+  END_DATE: string;
+};
+export type DateResponse = {
+  APP_PLATFORM: AppPlatform;
+  CREATE_DATE: string;
+  DATE_ID: number;
+  END_DATE: string;
+  START_DATE: string;
+  USER_ID: number;
 };

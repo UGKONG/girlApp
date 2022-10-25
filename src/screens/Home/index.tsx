@@ -1,6 +1,7 @@
-/* eslint-disable react-native/no-inline-styles */
-import React, {useMemo} from 'react';
-import {Alert} from 'react-native';
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable curly */
+
+import React, {useEffect, useMemo, useState} from 'react';
 import styled from 'styled-components/native';
 import Container from '../../components/Container';
 import Slider from '../../components/Slider';
@@ -11,30 +12,37 @@ import deviceImage from '../../../assets/images/login-device.png';
 import useBluetoothWrite from '../../../hooks/useBluetoothWrite';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import type {ParamListBase} from '@react-navigation/native';
+import useAxios from '../../../hooks/useAxios';
+import Toast from 'react-native-toast-message';
 
 export const modeList: number[] = [1, 2, 3, 4, 5];
 export const powerList: number[] = [1, 2, 3, 4, 5];
-export const timerList: number[] = [5, 6, 7, 8, 9];
+export const timerList: number[] = [5, 6, 7, 8, 9, 10, 11];
 
 type Props = {
   navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
 };
 export default function 홈({navigation}: Props): JSX.Element {
   const bleWrite = useBluetoothWrite();
+  const dispatch = store(x => x?.setState);
   const isLogin = store(x => x?.isLogin);
   const activeDevice = store(x => x?.activeDevice);
   const remoteState = store(x => x?.remoteState);
+  const possibleDeviceName = store(x => x?.possibleDeviceName);
+  const [time, setTime] = useState<null | number>(null);
 
   type RemoteList = {
+    id: number;
     name: string;
     list: number[];
     color: string;
     value: number | undefined;
     setValue: (val: number) => void;
   };
-  const remoteList = useMemo(
-    (): RemoteList[] => [
+  const remoteList = useMemo<RemoteList[]>(
+    () => [
       {
+        id: 1,
         name: '모드',
         list: modeList,
         color: '#e46b8b',
@@ -42,12 +50,12 @@ export default function 홈({navigation}: Props): JSX.Element {
         setValue: (val: number) => {
           bleWrite({
             type: 'mode',
-            id: activeDevice?.id as string,
             value: [0x70 + val],
           });
         },
       },
       {
+        id: 2,
         name: '에너지',
         list: powerList,
         color: '#e46b8b',
@@ -55,12 +63,12 @@ export default function 홈({navigation}: Props): JSX.Element {
         setValue: (val: number) => {
           bleWrite({
             type: 'power',
-            id: activeDevice?.id as string,
             value: [0x50 + val],
           });
         },
       },
       {
+        id: 3,
         name: '타이머 (분)',
         list: timerList,
         color: '#e46b8b',
@@ -68,43 +76,102 @@ export default function 홈({navigation}: Props): JSX.Element {
         setValue: (val: number) => {
           bleWrite({
             type: 'timer',
-            id: activeDevice?.id as string,
-            value: [0x80 + val],
+            value: [0x10 + (val - 4)],
           });
         },
       },
     ],
-    [remoteState, activeDevice, bleWrite],
+    [remoteState, activeDevice],
   );
 
-  // 루나 시작
-  const startLuna = (): void => {
-    const str: string = `에너지: ${remoteState?.power}단계, 타이머: ${remoteState?.timer}분`;
-    Alert.alert('LUNA', str);
+  // 장비 시작 플래그
+  const isOn = useMemo<boolean>(() => {
+    if (!activeDevice?.isOn) return false;
+    return true;
+  }, [activeDevice?.isOn]);
 
-    if (activeDevice?.id) {
-      bleWrite({
-        type: 'on',
-        id: activeDevice?.id,
-        value: [0x42],
-      });
-    }
+  // Timer 퍼센트
+  const timePercent = useMemo<number>(() => {
+    if (!remoteState?.timer || !time) return 0;
+    let result = (time / (remoteState?.timer * 60)) * 100;
+    return result <= 0 ? 0 : result >= 100 ? 100 : result;
+  }, [time, remoteState?.timer]);
+
+  // Timer Color
+  type TimeColor = {color: '#fff' | '#fac291' | '#ff0000'};
+  const timeColor = useMemo<TimeColor>(() => {
+    if (!time) return {color: '#fff'};
+    if (time <= 30) return {color: '#ff0000'};
+    if (time <= 120) return {color: '#fac291'};
+    return {color: '#fff'};
+  }, [time]);
+
+  // 시작 정보 저장
+  const createStartInfo = (): void => {
+    const data = {
+      APP_PLATFORM: possibleDeviceName,
+      USER_ID: isLogin?.USER_ID,
+      DEVICE_ID: activeDevice?.id,
+      DEVICE_NAME: activeDevice?.name,
+      USE_MODE: remoteState?.mode,
+      USE_POWER: remoteState?.power,
+      USE_TIMER: remoteState?.timer,
+      USE_BATTERY: activeDevice?.battery,
+    };
+    console.log(data);
+    useAxios.post('/device/use', data);
   };
 
-  // 루나 정지
+  // 루나 시작 (시작 플래그, 시작 신호 요청)
+  const startLuna = async (): Promise<void> => {
+    let timerSeconds = remoteState?.timer ? remoteState?.timer * 60 : 0;
+    setTime(timerSeconds);
+    dispatch('activeDevice', {...activeDevice, isOn: true});
+    bleWrite({type: 'on', value: [0x42]});
+
+    createStartInfo();
+    Toast.show({
+      text1: '장비가 시작되었습니다.',
+      text2: '장비 진행중에는 타이머 설정이 불가능합니다.',
+    });
+  };
+
+  // 루나 정지 (정지 플래그, 정지 신호 요청)
   const stopLuna = (): void => {
-    const str: string = '정지되었습니다.';
-    Alert.alert('LUNA', str);
-
-    if (activeDevice?.id) {
-      bleWrite({
-        type: 'off',
-        id: activeDevice?.id,
-        value: [0x40],
-      });
-    }
+    setTime(null);
+    dispatch('activeDevice', {...activeDevice, isOn: false});
+    bleWrite({type: 'off', value: [0x40]});
   };
 
+  // 타임 프로세스
+  const timeProcess = () => {
+    let interval: null | NodeJS.Timer = null;
+    // 꺼져있거나, 타임 정보가 없으면 Return
+    if (!isOn || time === null) return;
+
+    let _timer = time;
+    let count = 1;
+
+    // 반복 로직
+    interval = setInterval(() => {
+      let result = _timer - count;
+      count++;
+
+      if (result >= 0) return setTime(result);
+
+      stopLuna();
+      clearInterval(interval as NodeJS.Timeout);
+    }, 1000);
+
+    return () => {
+      clearInterval(interval as NodeJS.Timeout);
+    };
+  };
+
+  // 시작, 정지 시 실행 로직
+  useEffect(timeProcess, [isOn]);
+
+  // JSX
   return (
     <Container.View>
       <SymbolMenu navigation={navigation} />
@@ -116,31 +183,19 @@ export default function 홈({navigation}: Props): JSX.Element {
               <Row key={item?.name}>
                 <RowTitle>{item?.name}</RowTitle>
                 <SliderContainer>
-                  <SliderTextWrap>
-                    {item?.list?.map((txt, i) => (
-                      <SliderText
-                        onPress={() => item?.setValue(txt)}
-                        key={item?.name + txt}
-                        count={item?.list?.length}
-                        idx={i}
-                        active={Number(txt) === item?.value}
-                        ismargin={txt >= 10}>
-                        {txt}
-                      </SliderText>
-                    ))}
-                  </SliderTextWrap>
                   <SliderTouchHelpWrap>
                     {item?.list?.map((x, i) => (
-                      <SliderTouchHelp
-                        key={i}
-                        style={{
-                          opacity:
-                            item?.list?.findIndex(ii => ii === item?.value) ===
-                            i
-                              ? 0
-                              : 1,
-                        }}
-                      />
+                      <SliderTouchHelp key={i}>
+                        <SliderText
+                          onPress={() => item?.setValue(x)}
+                          key={item?.name + x}
+                          count={item?.list?.length}
+                          idx={i}
+                          active={Number(x) === item?.value}
+                          ismargin={x >= 10}>
+                          {x}
+                        </SliderText>
+                      </SliderTouchHelp>
                     ))}
                   </SliderTouchHelpWrap>
                   <Slider
@@ -150,6 +205,7 @@ export default function 홈({navigation}: Props): JSX.Element {
                     color={item?.color}
                     value={item?.value ?? item?.list[0]}
                     setValue={item?.setValue}
+                    disabled={item?.id === 3 && isOn}
                   />
                 </SliderContainer>
               </Row>
@@ -157,8 +213,10 @@ export default function 홈({navigation}: Props): JSX.Element {
             <Row>
               {isLogin ? (
                 <>
-                  <SubmitBtn onPress={startLuna}>
-                    <SubmitBtnText>루나 시작</SubmitBtnText>
+                  <SubmitBtn isOn={isOn} onPress={startLuna}>
+                    <SubmitBtnText isOn={isOn}>
+                      {isOn ? '진행중' : '루나 시작'}
+                    </SubmitBtnText>
                   </SubmitBtn>
                   <SubmitBtn onPress={stopLuna}>
                     <SubmitBtnText>정지</SubmitBtnText>
@@ -170,6 +228,24 @@ export default function 홈({navigation}: Props): JSX.Element {
                 </LoginDescription>
               )}
             </Row>
+
+            {/* 프로그래스 바 */}
+            {isLogin ? (
+              <ProgressBarContainer>
+                {isOn ? (
+                  <>
+                    <ProgressStatus style={timeColor}>
+                      {time ?? 0}초 후 자동 정지
+                    </ProgressStatus>
+                    <ProgressBarWrap>
+                      <ProgressBar percent={timePercent} />
+                    </ProgressBarWrap>
+                  </>
+                ) : (
+                  <ProgressStatus>루나 시작이 필요합니다.</ProgressStatus>
+                )}
+              </ProgressBarContainer>
+            ) : null}
           </RemoteContainer>
         </>
       ) : (
@@ -189,16 +265,17 @@ export const listLast = (list: number[]): number => list[list?.length - 1];
 const RemoteContainer = styled.View`
   width: 100%;
   flex: 1;
-  justify-content: space-around;
+  justify-content: space-between;
+  padding-top: 20px;
 `;
 export const Row = styled.View`
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 16px;
 `;
 export const RowTitle = styled.Text`
-  width: 100px;
+  width: 90px;
   text-align: center;
   font-size: 16px;
   font-weight: 700;
@@ -226,26 +303,33 @@ type SlideTextProps = {
   ismargin: boolean;
 };
 export const SliderText = styled.Text`
-  color: ${(x: SlideTextProps) => (x?.active ? '#d0446a' : '#ed95ab')};
+  color: ${(x: SlideTextProps) => (x?.active ? '#d0446a' : '#fe94af')};
   font-weight: ${(x: SlideTextProps) => (x?.active ? 700 : 400)};
-  transform: translateX(
-    ${(x: SlideTextProps) => (x?.ismargin ? '4px' : '0px')}
-  );
+  position: absolute;
+  top: 120%;
+  white-space: nowrap;
+  word-break: keep-all;
+  width: 24px;
+  text-align: center;
 `;
-export const SubmitBtn = styled.TouchableOpacity`
-  width: 70px;
+type SubmitBtnProps = {isOn: boolean};
+export const SubmitBtn = styled.TouchableOpacity.attrs((x: SubmitBtnProps) => ({
+  disabled: x?.isOn,
+}))`
+  /* width: 70px;
   height: 70px;
-  border-radius: 20px;
-  border: 3px solid #fff;
   padding-left: 10px;
-  padding-right: 8px;
+  padding-right: 8px; */
+  padding: 12px 16px;
+  border-radius: 10px;
   justify-content: center;
   align-items: center;
-  background-color: #fce7eb;
-  margin: 0 60px;
+  border: 3px solid #fff;
+  background-color: ${(x: SubmitBtnProps) => (x?.isOn ? '#ddd' : '#fce7eb')};
+  margin: 10px 40px 0;
 `;
 export const SubmitBtnText = styled.Text`
-  color: #e87ea7;
+  color: ${(x: SubmitBtnProps) => (x?.isOn ? '#aaa' : '#e87ea7')};
   font-size: 18px;
   font-weight: 700;
   line-height: 22px;
@@ -299,4 +383,30 @@ const SliderTouchHelp = styled.View`
   max-height: 15px;
   border-radius: 15px;
   background-color: #e46b8b11;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+`;
+const ProgressBarContainer = styled.View`
+  width: 100%;
+  height: 31px;
+`;
+const ProgressStatus = styled.Text`
+  font-size: 14px;
+  padding: 2px 4px;
+  color: #fff;
+`;
+const ProgressBarWrap = styled.View`
+  width: 100%;
+  height: 5px;
+  border-radius: 10px;
+  background-color: #ffffff80;
+  overflow: hidden;
+`;
+type ProgressBarProps = {percent: number};
+const ProgressBar = styled.View`
+  background-color: #e46b8b;
+  width: ${(x: ProgressBarProps) => x?.percent ?? 100}%;
+  height: 100%;
 `;

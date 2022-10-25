@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable curly */
-import React, {useCallback, useState} from 'react';
+
+import React, {useState} from 'react';
 import {Platform} from 'react-native';
 import styled from 'styled-components/native';
 import store from '../../store';
@@ -16,9 +18,17 @@ import {
 } from '@react-native-seoul/kakao-login';
 import type {GetProfileResponse} from '@react-native-seoul/naver-login';
 import {NaverLogin, getProfile} from '@react-native-seoul/naver-login';
-import type {SnsLoginData, NaverLoginPlatformKey, User} from '../../types';
+import type {
+  SnsLoginData,
+  NaverLoginPlatformKey,
+  User,
+  SnsLoginList,
+} from '../../types';
+import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import type {ParamListBase} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Checkbox} from 'react-native-paper';
+import useAxios from '../../../hooks/useAxios';
 
 const iosKeys: NaverLoginPlatformKey = {
   kConsumerKey: 'JNaVcW1KLIzF72YKwfXB',
@@ -34,108 +44,136 @@ const androidKeys: NaverLoginPlatformKey = {
 
 const naverLoginPlatformKey = Platform.OS === 'android' ? androidKeys : iosKeys;
 
-export default function 로그인(): JSX.Element {
+type Props = {
+  navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
+};
+export default function 로그인({navigation}: Props): JSX.Element {
   const dispatch = store(x => x?.setState);
+  const possibleDeviceName = store(x => x?.possibleDeviceName);
   const [isAutoLogin, setIsAutoLogin] = useState(true);
 
   // 최종 로그인
-  const submit = useCallback(
-    ({platform, id, name}: SnsLoginData): void => {
-      if (!dispatch) return;
-      if (id === '' || name === '') {
+  const submit = ({appPlatform, snsPlatform, id, name}: SnsLoginData): void => {
+    if (!dispatch) return;
+
+    if (id === '' || name === '') {
+      Toast.show({
+        type: 'error',
+        text1: snsPlatform + '계정으로 로그인을 시도하였습니다.',
+        text2: '로그인에 실패하였습니다.',
+      });
+      return;
+    }
+
+    const userData: User = {
+      AUTH_ID: id,
+      USER_NAME: name,
+      SNS_PLATFORM: snsPlatform,
+      APP_PLATFORM: 'LUNA',
+    };
+
+    useAxios
+      .post('/user/login', userData)
+      .then(({data}) => {
+        if (!data?.result) {
+          return Toast.show({
+            type: 'error',
+            text1: snsPlatform + '계정으로 로그인을 시도하였습니다.',
+            text2: '로그인에 실패하였습니다.',
+          });
+        }
+
+        // 성공
+        dispatch('isLogin', data?.current);
+        AsyncStorage.setItem('isLogin', JSON.stringify(data?.current));
+
+        Toast.show({
+          type: 'success',
+          text1: snsPlatform + '계정으로 로그인하였습니다.',
+          text2: name + '님 반갑습니다.',
+        });
+      })
+      .catch(() => {
+        // 실패
+        navigation.navigate('home');
+        dispatch('isLogin', null);
+        AsyncStorage.removeItem('isLogin');
+
         Toast.show({
           type: 'error',
-          text1: platform + '계정으로 로그인을 시도하였습니다.',
+          text1: snsPlatform + '계정으로 로그인을 시도하였습니다.',
           text2: '로그인에 실패하였습니다.',
         });
-        return;
-      }
-
-      Toast.show({
-        type: 'success',
-        text1: platform + '계정으로 로그인하였습니다.',
-        text2: name + '님 반갑습니다.',
+      })
+      .finally(() => {
+        dispatch('isModal', false);
       });
-
-      const userData: User = {
-        USER_ID: id,
-        USER_NAME: name,
-        PLATFORM: platform,
-      };
-
-      dispatch('isModal', null);
-      dispatch('isLogin', userData);
-
-      if (isAutoLogin) {
-        AsyncStorage.setItem('isLogin', JSON.stringify(userData));
-      } else {
-        AsyncStorage.removeItem('isLogin');
-      }
-    },
-    [dispatch, isAutoLogin],
-  );
+  };
 
   // 카카오 회원정보 조회
-  const getKakaoData = useCallback((): void => {
+  const getKakaoData = (): void => {
     getKakaoProfile().then(
       (
         value: KakaoProfile | KakaoProfileNoneAgreement,
       ): void | PromiseLike<void> => {
-        const platform = 'Kakao';
+        const snsPlatform = 'KAKAO';
         const id: string = value?.id ?? '';
-        const name: string = (value?.nickname as unknown as string) ?? '';
+        const name: string = (value?.nickname as string) ?? '';
 
-        submit({
-          platform,
+        let data: SnsLoginData = {
+          appPlatform: possibleDeviceName,
+          snsPlatform,
           id,
           name,
-        });
+        };
+        submit(data);
       },
     );
-  }, [submit]);
-
-  // 카카오 로그인
-  const kakaoLogin = useCallback((): void => {
-    login().then(getKakaoData);
-  }, [getKakaoData]);
+  };
 
   // 네이버 회원정보 조회
-  const getNaverData = useCallback(
-    (token: string): void => {
-      getProfile(token).then((result: GetProfileResponse) => {
-        const platform = 'Naver';
-        let data: SnsLoginData = {platform, id: '', name: ''};
+  const getNaverData = (token: string): void => {
+    getProfile(token).then((result: GetProfileResponse) => {
+      const snsPlatform = 'NAVER';
+      let data: SnsLoginData = {
+        appPlatform: possibleDeviceName,
+        snsPlatform,
+        id: '',
+        name: '',
+      };
 
-        if (result.message === 'success') {
-          data = {
-            ...data,
-            id: result?.response?.id ?? '',
-            name: result?.response?.name ?? '',
-          };
-        }
+      if (result.message === 'success') {
+        data = {
+          ...data,
+          id: result?.response?.id ?? '',
+          name: result?.response?.name ?? '',
+        };
+      }
 
-        submit(data);
-      });
-    },
-    [submit],
-  );
+      submit(data);
+    });
+  };
 
   // 네이버 로그인
-  const naverLogin = useCallback((): void => {
+  const naverLogin = (): void => {
     NaverLogin.login(naverLoginPlatformKey, (err, token): void => {
       if (err || !token?.accessToken) return;
-
       getNaverData(token?.accessToken);
     });
-  }, [getNaverData]);
+  };
 
-  // SNS 로그인 리스트
-  const snsList = useSnsList(kakaoLogin, naverLogin);
+  // 카카오 로그인
+  const kakaoLogin = (): void => {
+    login()
+      .then(getKakaoData)
+      .catch(() => {});
+  };
 
   // 자동 로그인 체크
-  const autoLoginCheck = () => {
-    setIsAutoLogin(prev => !prev);
-  };
+  const autoLoginCheck = (): void => setIsAutoLogin(prev => !prev);
+
+  // SNS 로그인 리스트
+  const snsList: Array<SnsLoginList> = useSnsList(kakaoLogin, naverLogin);
 
   return (
     <Container.View>

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable curly */
 import React, {useEffect} from 'react';
@@ -9,6 +8,7 @@ import {
   Alert,
   NativeModules,
   NativeEventEmitter,
+  AppState,
 } from 'react-native';
 import {
   NavigationContainer,
@@ -24,6 +24,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import useBluetoothInit from '../hooks/useBluetoothInit';
 import useBluetoothWrite from '../hooks/useBluetoothWrite';
 import useBluetoothDataResponse from '../hooks/useBluetoothDataResponse';
+import SplashScreen from 'react-native-splash-screen';
 
 const os = Platform.OS;
 const BleManagerModule = NativeModules.BleManager;
@@ -111,13 +112,14 @@ export default function App(): JSX.Element {
     if (!activeDevice) return;
     bleWrite({
       type: 'battery',
-      id: activeDevice?.id,
       value: [0x30],
     });
   };
 
   // 초기 셋팅
   useEffect(() => {
+    // 첫 로딩 페이지 Hide
+    SplashScreen.hide();
     // 권한 요청
     getpermission();
     // 블루투스 Init
@@ -146,10 +148,19 @@ export default function App(): JSX.Element {
     let interval: NodeJS.Timer | undefined;
 
     clearInterval(interval);
-    interval = setInterval(getBattery, 60 * 1000);
+    interval = setInterval(getBattery, 25 * 1000);
 
     return (): void => clearInterval(interval);
   }, [activeDevice?.id, isBluetoothReady]);
+
+  // 앱 종료 시 장비 정지 요청
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', () => {
+      let isExit = AppState?.currentState === 'background';
+      if (isExit) return bleWrite({type: 'exit', value: [0x99]});
+    });
+    return () => subscription.remove();
+  }, []);
 
   return (
     <NavigationContainer ref={navigationRef}>

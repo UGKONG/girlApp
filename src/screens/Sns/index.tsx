@@ -7,11 +7,36 @@ import TextPage from '../../components/TextPage';
 export default function SNS둘러보기(): JSX.Element {
   type SnsBtnList = {name: string; top: number; left: number; url: string};
   const snsBtnList = useRef<SnsBtnList[]>([
-    {name: 'naverBlog', top: 10, left: 88, url: 'https://naver.com'},
-    {name: 'facebook', top: 10, left: 236, url: 'https://facebook.com'},
-    {name: 'instagram', top: 136, left: 276, url: 'https://instagram.com'},
-    {name: 'youtube', top: 210, left: 170, url: 'https://youtube.com'},
-    {name: 'kakaoStory', top: 130, left: 57, url: 'https://kakao.com'},
+    {
+      name: 'naverBlog',
+      top: 10,
+      left: 88,
+      url: 'https://blog.naver.com/donomedical',
+    },
+    {
+      name: 'facebook',
+      top: 10,
+      left: 236,
+      url: 'https://www.facebook.com/profile.php?id=100085282237689',
+    },
+    {
+      name: 'instagram',
+      top: 136,
+      left: 276,
+      url: 'https://www.instagram.com/dono.medical',
+    },
+    {
+      name: 'youtube',
+      top: 210,
+      left: 170,
+      url: 'https://www.youtube.com/channel/UChuWSXzGHqOghcSdLPeRXdQ',
+    },
+    {
+      name: 'kakaoStory',
+      top: 130,
+      left: 57,
+      url: 'https://pf.kakao.com/_xhxkdVxj',
+    },
   ]);
 
   return (
