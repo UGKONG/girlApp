@@ -45,8 +45,11 @@ export const Header = styled.View`
 export const Title = styled.Text`
   font-size: 15px;
   font-weight: 600;
+  color: #555555;
 `;
-export const Count = styled.Text``;
+export const Count = styled.Text`
+  color: #777777;
+`;
 export const List = styled.View`
   width: 100%;
   min-height: 150px;

@@ -243,4 +243,5 @@ const AutoLoginContainer = styled.View`
 `;
 const AutoLoginText = styled.Text`
   font-size: 12px;
+  color: #555555;
 `;

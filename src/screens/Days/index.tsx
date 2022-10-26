@@ -3,7 +3,7 @@
 /* eslint-disable curly */
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components/native';
-import {Calendar, DateData} from 'react-native-calendars';
+import {Calendar, CalendarList, DateData} from 'react-native-calendars';
 import Toast from 'react-native-toast-message';
 import Container from '../../components/Container';
 import TextPage from '../../components/TextPage';
@@ -14,6 +14,7 @@ import {iAxiosResponse} from '../../../hooks/useApiResponse';
 import {Alert} from 'react-native';
 import listMemo from './listMemo';
 import type {AppPlatform, DayObject, CalendarSelectDate} from '../../types';
+import ArrowIcon from 'react-native-vector-icons/AntDesign';
 
 export interface DaysType {
   USER_ID: number | null | undefined;
@@ -122,27 +123,23 @@ export default function Days(): JSX.Element {
     );
 
     // 종료일이 입력되지 않음.
-    if (prevDate?.END_DATE === null && nextDate?.START_DATE) {
+    if (
+      (prevDate?.END_DATE === null && nextDate?.START_DATE) ||
+      (prevDate?.END_DATE === null && !nextDate)
+    ) {
       return datePut(prevDate?.DAYS_ID as number, clickedDate);
     }
 
     // 사이에 남은 일수가 1일 밖에 없을 때.
-    let clickedDateObj = new Date(clickedDate);
-
-    if (prevDate && prevDate?.END_DATE) {
-      let prevEndDateObj = new Date(prevDate?.END_DATE);
-      let calc = clickedDateObj?.getTime() - prevEndDateObj?.getTime();
-      calc = calc / 1000 / 24 / 60 / 60;
-      if (calc <= 1) prevValidate = false;
-    }
     if (nextDate && nextDate?.START_DATE) {
+      let clickedDateObj = new Date(clickedDate);
       let nextStartDateObj = new Date(nextDate?.START_DATE);
       let calc = nextStartDateObj?.getTime() - clickedDateObj?.getTime();
       calc = calc / 1000 / 24 / 60 / 60;
       if (calc <= 1) nextValidate = false;
     }
 
-    if (!prevValidate && !nextValidate) {
+    if (!nextValidate) {
       return Toast.show({type: 'error', text1: '해당일에 지정할 수 없습니다.'});
     }
 
@@ -174,14 +171,18 @@ export default function Days(): JSX.Element {
 
       <CustomCalendar
         monthFormat={'yyyy년 MM월'}
-        enableSwipeMonths={false}
+        enableSwipeMonths={true}
         markingType={'period'}
         onDayPress={clickDate}
+        renderArrow={dir => (
+          <ArrowIcon name={'arrow' + dir} color="#ea8aaf" size={26} />
+        )}
         markedDates={{
           [useDate(undefined, 'date')]: {textColor: '#dc6f97', today: true},
           ...list,
         }}
         onMonthChange={changeMonth}
+        hideExtraDays={true}
       />
 
       <Tip>
@@ -199,6 +200,7 @@ const Tip = styled.Text`
   color: #fff;
   line-height: 22px;
   margin-top: 10px;
+  margin-bottom: 50px;
 `;
 const CustomCalendar = styled(Calendar)`
   padding-bottom: 6px;

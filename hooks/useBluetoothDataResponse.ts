@@ -103,10 +103,6 @@ export default function () {
       // 장비 정지
       return;
     }
-
-    return () => {
-      console.log('response out');
-    };
   };
 
   useEffect(response, [data]);

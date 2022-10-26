@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable curly */
 import React, {useEffect, useMemo, useState} from 'react';
 import {NativeModules, NativeEventEmitter, Alert} from 'react-native';
+import {request, PERMISSIONS} from 'react-native-permissions';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import styled from 'styled-components/native';
 import BleManager from 'react-native-ble-manager';
@@ -45,24 +47,38 @@ export default function 검색된장비_리스트({
 
   // 검색 시작
   const startScan = async (): Promise<void> => {
-    if (!state) {
-      return Alert.alert(
-        'LUNA',
-        '블루투스가 꺼져있습니다. 블루투스를 켜시겠습니까?',
-        [{text: '취소'}, {text: '켜기', onPress: bluetoothOn}],
-        {cancelable: true},
-      );
-    }
-    setIsScan(true);
-    setList([]);
+    request(PERMISSIONS.ANDROID.BLUETOOTH_SCAN)
+      .then(result => {
+        // if (x !== 'granted') {
+        //   return Alert.alert(
+        //     possibleDeviceName,
+        //     '서비스 이용에 모든 권한이 필요합니다.',
+        //   );
+        // }
 
-    try {
-      await BleManager.scan([], 5, false);
-      await BleManager.getDiscoveredPeripherals();
-    } catch {
-      setIsScan(false);
-      Alert.alert('LUNA', '검색에 실패하였습니다. 다시 시도해주세요.');
-    }
+        if (!state) {
+          return Alert.alert(
+            'LUNA',
+            '블루투스가 꺼져있습니다. 블루투스를 켜시겠습니까?',
+            [{text: '취소'}, {text: '켜기', onPress: bluetoothOn}],
+            {cancelable: true},
+          );
+        }
+        setIsScan(true);
+        setList([]);
+
+        BleManager.scan([], 5, false)
+          .then(() => {
+            BleManager.getDiscoveredPeripherals()
+              .then(() => {})
+              .catch(() => {});
+          })
+          .catch(() => {});
+      })
+      .catch(() => {
+        setIsScan(false);
+        Alert.alert('LUNA', '검색에 실패하였습니다. 다시 시도해주세요.');
+      });
   };
 
   const scanning = (data: Device): void => {

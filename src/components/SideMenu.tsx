@@ -119,4 +119,6 @@ const Menu = styled.TouchableOpacity`
   padding: 10px 5px;
   margin-bottom: 5px;
 `;
-const MenuText = styled.Text``;
+const MenuText = styled.Text`
+  color: #555555;
+`;

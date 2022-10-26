@@ -118,8 +118,10 @@ export default function 홈({navigation}: Props): JSX.Element {
       USE_TIMER: remoteState?.timer,
       USE_BATTERY: activeDevice?.battery,
     };
-    console.log(data);
-    useAxios.post('/device/use', data);
+    useAxios
+      .post('/device/use', data)
+      .then(() => {})
+      .catch(() => {});
   };
 
   // 루나 시작 (시작 플래그, 시작 신호 요청)

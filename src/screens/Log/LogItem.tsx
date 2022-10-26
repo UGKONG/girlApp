@@ -38,4 +38,5 @@ const Row = styled(Text)`
   font-size: 14px;
   font-weight: 400;
   margin-bottom: 2px;
+  color: #777;
 `;

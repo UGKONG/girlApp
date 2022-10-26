@@ -53,7 +53,7 @@ export default function 사용방법(): JSX.Element {
             min={listFirst(powerList)}
             max={listLast(powerList)}
             color={'#e46b8b'}
-            value={remoteState?.timer ?? powerList[1]}
+            value={powerList[1]}
             disabled={true}
           />
         </SliderContainer>
@@ -85,7 +85,7 @@ export default function 사용방법(): JSX.Element {
             min={listFirst(modeList)}
             max={listLast(modeList)}
             color={'#e46b8b'}
-            value={remoteState?.mode ?? modeList[2]}
+            value={modeList[2]}
             disabled={true}
           />
         </SliderContainer>
@@ -117,7 +117,7 @@ dono.LUNA는 작동 11분 후에 자동으로 꺼집니다. 11분이면 충분�
             min={listFirst(timerList)}
             max={listLast(timerList)}
             color={'#e46b8b'}
-            value={remoteState?.timer ?? timerList[2]}
+            value={timerList[2]}
             disabled={true}
           />
         </SliderContainer>

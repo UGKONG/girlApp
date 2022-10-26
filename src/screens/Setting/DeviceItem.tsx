@@ -14,7 +14,7 @@ import useBluetoothWrite from '../../../hooks/useBluetoothWrite';
 
 type Props = {
   data: Device | MyDevice;
-  type: 'scan' | 'my';
+  type: 'scan' | 'my' | 'connect';
   setList?: SetState<Device[]>;
 };
 export default function 스캔된장비_아이템({
@@ -39,7 +39,10 @@ export default function 스캔된장비_아이템({
 
   // 내장비 등록
   const addMyDevice = async (value: string) => {
-    const saveData: MyDevice = {id: data?.id, name: value};
+    const saveData: MyDevice = {
+      id: data?.id,
+      name: value || data?.name || 'MY LUNA DEVICE',
+    };
 
     dispatch('myDeviceList', [...myDeviceList, saveData]);
     const local = await AsyncStorage.getItem('myDeviceList');
@@ -106,7 +109,10 @@ export default function 스캔된장비_아이템({
     Prompt(
       'LUNA',
       '내장비의 이름을 입력해주세요.',
-      [{text: '취소'}, {text: '확인', onPress: addMyDevice}],
+      [
+        {text: '취소'},
+        {text: '확인', onPress: addMyDevice, style: 'destructive'},
+      ],
       {
         cancelable: true,
         placeholder: 'MY LUNA DEVICE',
@@ -185,9 +191,9 @@ export default function 스캔된장비_아이템({
     : connectOption;
 
   return (
-    <Container onPress={clickFn}>
+    <Container type={type} onPress={clickFn}>
       <ContainerText>{title}</ContainerText>
-      {isConnect && (
+      {type !== 'connect' && isConnect && (
         <Option>
           <Icon name="link" />
           <Status>연결중</Status>
@@ -203,10 +209,12 @@ export default function 스캔된장비_아이템({
   );
 }
 
+type ContainerProps = {type: string};
 const Container = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.7,
 }))`
-  background: #f19eb4;
+  background: ${(x: ContainerProps) =>
+    x?.type === 'connect' ? '#e27894' : '#f19eb4'};
   padding: 0;
   margin-bottom: 10px;
   border-radius: 6px;

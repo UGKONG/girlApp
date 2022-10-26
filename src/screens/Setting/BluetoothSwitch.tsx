@@ -64,4 +64,5 @@ const Label = styled.Text`
   font-size: 15px;
   font-weight: 700;
   text-align: center;
+  color: #777;
 `;

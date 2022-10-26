@@ -9,6 +9,7 @@ import {
   NativeModules,
   NativeEventEmitter,
   AppState,
+  PermissionsAndroid,
 } from 'react-native';
 import {
   NavigationContainer,
@@ -38,13 +39,37 @@ export default function App(): JSX.Element {
   const dispatch = store(x => x?.setState);
   const activeDevice = store(x => x?.activeDevice);
   const isBluetoothReady = store(x => x?.isBluetoothReady);
+  const possibleDeviceName = store(x => x?.possibleDeviceName);
   const isModal = store<boolean>(x => x?.isModal);
 
   // 안드로이드 위치 권한 요청
   const androidLocationRequest = (fn: any): void => {
-    request(PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION).then(x => {
-      if (x === 'denied') fn();
+    PermissionsAndroid.requestMultiple([
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+      PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+      PermissionsAndroid.PERMISSIONS.BLUETOOTH_ADVERTISE,
+    ]).then(result => {
+      if (
+        result['android.permission.ACCESS_FINE_LOCATION'] &&
+        result['android.permission.BLUETOOTH_SCAN'] &&
+        result['android.permission.BLUETOOTH_CONNECT'] //&&
+        // result['android.permission.BLUETOOTH_ADVERTISE'] === 'granted'
+      ) {
+        console.log('모든 권한 획득');
+      } else {
+        Alert.alert(
+          possibleDeviceName,
+          '서비스 이용에 모든 권한이 필요합니다.',
+        );
+        if (fn) setTimeout(() => fn(), 1000);
+      }
     });
+
+    // request(PERMISSIONS.ANDROID.BLUETOOTH_SCAN).then(x => {
+    //   if (x === 'denied') fn();
+    //   console.log(x);
+    // });
   };
 
   // IOS 위치 권한 요청
