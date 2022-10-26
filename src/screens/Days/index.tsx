@@ -1,159 +1,158 @@
-/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable curly */
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components/native';
+import {Calendar, DateData} from 'react-native-calendars';
+import Toast from 'react-native-toast-message';
 import Container from '../../components/Container';
 import TextPage from '../../components/TextPage';
-import {Calendar} from 'react-native-calendars';
-import type {
-  CalendarSelectDate,
-  DateResponse,
-  DateSaveForm,
-  DayObject,
-} from '../../types';
 import {useDate} from '../../functions';
 import store from '../../store';
 import useAxios from '../../../hooks/useAxios';
 import {iAxiosResponse} from '../../../hooks/useApiResponse';
 import {Alert} from 'react-native';
+import listMemo from './listMemo';
+import type {AppPlatform, DayObject, CalendarSelectDate} from '../../types';
+
+export interface DaysType {
+  USER_ID: number | null | undefined;
+  APP_PLATFORM: AppPlatform | null | undefined;
+  DAYS_ID: number | null | undefined;
+  START_DATE: string;
+  END_DATE: string | null | undefined;
+  CREATE_DATE: string | null | undefined;
+}
 
 export default function Days(): JSX.Element {
   const dispatch = store(x => x?.setState);
   const isLogin = store(x => x?.isLogin);
-  type Data = {start?: string; end?: string};
-  const [list, setList] = useState<Array<Data>>([]);
-  const [data, setData] = useState<Data>({start: undefined, end: undefined});
+  const [currentList, setCurrentList] = useState<DaysType[]>([]);
   const [YM, setYM] = useState<string>(
     useDate(undefined, 'date')?.replace('-', '')?.slice(0, 6),
   );
+  const list: CalendarSelectDate = listMemo(currentList);
 
-  const getDate = () => {
+  // 날짜 조회
+  const getDays = () => {
     if (!isLogin?.USER_ID || !YM) return;
+    const params = {USER_ID: isLogin?.USER_ID, APP_PLATFORM: 'LUNA', YM};
 
-    useAxios
-      .get('/date', {
-        params: {
-          USER_ID: isLogin?.USER_ID,
-          APP_PLATFORM: 'LUNA',
-          YM,
-        },
-      })
-      .then(({data: resData}: iAxiosResponse) => {
-        if (!resData?.result) return;
-
-        let pushArray = resData?.current?.map((x: DateResponse) => ({
-          start: x?.START_DATE,
-          end: x?.END_DATE,
-        }));
-        setList(prev => [...prev].concat(pushArray));
-      });
+    useAxios.get('/days', {params}).then(({data}: iAxiosResponse) => {
+      if (!data?.result) return setCurrentList([]);
+      setCurrentList(data?.current);
+    });
   };
 
-  const dateSave = (form: DateSaveForm) => {
+  // 날짜 추가 (시작일)
+  const datePost = (START_DATE: string) => {
+    if (!isLogin?.USER_ID) return;
+    let form = {USER_ID: isLogin?.USER_ID, APP_PLATFORM: 'LUNA', START_DATE};
     useAxios
-      .post('/date', form)
-      .then(() => {})
+      .post('/days', form)
+      .then(() => getDays())
       .catch(() => {});
   };
 
-  const dateDelete = () => {};
-
-  const onDayPress = (day: DayObject): void => {
-    let select = day?.dateString;
-
-    // 기존에 있는지 여부 확인
-    if (selectedDate[select]) {
-      return Alert.alert('LUNA', '저장된 생리일을 제거하시겠습니까?', [
-        {text: '취소'},
-        {text: '삭제', onPress: () => dateDelete()},
-      ]);
-    }
-
-    let start = data?.start;
-    let end = data?.end;
-
-    if (!start) return setData(prev => ({...prev, start: select}));
-    if (start === select) return setData({start: undefined, end: undefined});
-    if (end === select) return setData(prev => ({...prev, end: undefined}));
-
-    setData(prev => ({...prev, end: select}));
+  // 종료일 변경
+  const datePut = (DAYS_ID: number, END_DATE: string | null) => {
+    let form = {
+      USER_ID: isLogin?.USER_ID,
+      APP_PLATFORM: 'LUNA',
+      DAYS_ID,
+      END_DATE,
+    };
+    useAxios
+      .put('/days', form)
+      .then(() => getDays())
+      .catch(() => {});
   };
 
-  const selectedDate = useMemo(() => {
-    if (!isLogin?.USER_ID) return {};
+  // 날짜 삭제
+  const dateDelete = (DAYS_ID: number) => {
+    if (!isLogin?.USER_ID || !DAYS_ID) return;
 
-    let start = data?.start;
-    let end = data?.end;
-    let selected: boolean = true;
-    let startingDay: boolean = true;
-    let endingDay: boolean = true;
-    let color: string = '#dc6f97';
-    let result: CalendarSelectDate = {
-      [useDate(undefined, 'date')]: {textColor: color},
-    };
+    let form = {USER_ID: isLogin?.USER_ID, APP_PLATFORM: 'LUNA', DAYS_ID};
+    useAxios
+      .delete('/days', {params: form})
+      .then(() => {
+        Toast.show({text1: '삭제되었습니다.'});
+        getDays();
+      })
+      .catch(() => {});
+  };
 
-    // 이미 불러온 데이터
-    list?.forEach(li => {
-      if (!li?.start || !li?.end) return;
-      result[li?.start] = {selected, startingDay, color};
-      result[li?.end] = {selected, endingDay, color};
+  // 날짜 선택 시
+  const clickDate = ({dateString: clickedDate}: DateData): void => {
+    let find = list[clickedDate];
+    let prevValidate: boolean = true;
+    let nextValidate: boolean = true;
 
-      let prevStartDate = new Date(li?.start);
-      let prevEndDate = new Date(li?.end);
-      let calc = prevEndDate.getTime() - prevStartDate.getTime();
-      calc = calc / 1000 / 24 / 60 / 60 - 1;
+    if (find && !find?.today) {
+      let optionBtn = {
+        text: '종료일 변경',
+        onPress: () => datePut(find?.id, null),
+      };
+      let buttons = [
+        {text: '취소'},
+        {text: '삭제', onPress: () => dateDelete(find?.id)},
+      ];
+      if (!find?.startingDay) buttons.unshift(optionBtn);
+      return Alert.alert('LUNA', '저장된 생리일을 제거하시겠습니까?', buttons, {
+        cancelable: true,
+      });
+    }
 
-      for (let i = 0; i < calc; i++) {
-        prevStartDate.setDate(prevStartDate.getDate() + 1);
-        result[useDate(prevStartDate, 'date')] = {
-          color: '#e687aa',
-          textColor: '#fff',
-        };
-      }
+    let keys: Array<string> = [];
+    currentList?.forEach(x => {
+      if (x?.START_DATE) keys.push(x?.START_DATE);
+      if (x?.END_DATE) keys.push(x?.END_DATE);
+    });
+    keys.push(clickedDate);
+    keys?.sort((a, b) => {
+      return Number(a?.replace(/-/g, '')) - Number(b?.replace(/-/g, ''));
     });
 
-    if (!start) return result;
-    result[start ?? ''] = {selected, startingDay, color};
+    let idx: number = keys?.indexOf(clickedDate);
+    let prevDate: DaysType | undefined = currentList?.find(
+      x => x?.END_DATE === keys[idx - 1] || x?.START_DATE === keys[idx - 1],
+    );
+    let nextDate: DaysType | undefined = currentList?.find(
+      x => x?.START_DATE === keys[idx + 1] || x?.END_DATE === keys[idx + 1],
+    );
 
-    if (!end) return result;
-    result[end ?? ''] = {selected, endingDay, color};
-
-    let startDate: Date = new Date(start);
-    let endDate: Date = new Date(end);
-    let isReverse: boolean = endDate.getTime() - startDate.getTime() < 0;
-
-    // 시작일보다 종료일이 빠르면..
-    if (isReverse) {
-      result[start] = {...result[start], startingDay: false, endingDay};
-      result[end] = {...result[end], endingDay: false, startingDay};
-      [start, end] = [end, start];
-      startDate = new Date(start);
-      endDate = new Date(end);
+    // 종료일이 입력되지 않음.
+    if (prevDate?.END_DATE === null && nextDate?.START_DATE) {
+      return datePut(prevDate?.DAYS_ID as number, clickedDate);
     }
 
-    // 시작일과 종료일 사이 일자 추가
-    let calcDate = new Date(start);
-    let calc = endDate.getTime() - startDate.getTime();
-    calc = calc / 1000 / 24 / 60 / 60 - 1;
+    // 사이에 남은 일수가 1일 밖에 없을 때.
+    let clickedDateObj = new Date(clickedDate);
 
-    for (let i = 0; i < calc; i++) {
-      calcDate.setDate(calcDate.getDate() + 1);
-      result[useDate(calcDate, 'date')] = {color: '#e687aa', textColor: '#fff'};
+    if (prevDate && prevDate?.END_DATE) {
+      let prevEndDateObj = new Date(prevDate?.END_DATE);
+      let calc = clickedDateObj?.getTime() - prevEndDateObj?.getTime();
+      calc = calc / 1000 / 24 / 60 / 60;
+      if (calc <= 1) prevValidate = false;
+    }
+    if (nextDate && nextDate?.START_DATE) {
+      let nextStartDateObj = new Date(nextDate?.START_DATE);
+      let calc = nextStartDateObj?.getTime() - clickedDateObj?.getTime();
+      calc = calc / 1000 / 24 / 60 / 60;
+      if (calc <= 1) nextValidate = false;
     }
 
-    let form: DateSaveForm = {
-      USER_ID: isLogin?.USER_ID as number,
-      APP_PLATFORM: 'LUNA',
-      START_DATE: start,
-      END_DATE: end,
-    };
-    dateSave(form);
+    if (!prevValidate && !nextValidate) {
+      return Toast.show({type: 'error', text1: '해당일에 지정할 수 없습니다.'});
+    }
 
-    return result;
-  }, [data, isLogin?.USER_ID, list]);
+    // 시작일 추가
+    datePost(clickedDate);
+  };
 
-  const onMonthChange = ({year, month}: DayObject) => {
-    setYM(String(year) + String(month));
+  // 월 변경 시
+  const changeMonth = ({year, month}: DayObject) => {
+    setYM(String(year) + String(month < 10 ? '0' + month : month));
   };
 
   useEffect((): void => {
@@ -163,7 +162,7 @@ export default function Days(): JSX.Element {
     }
   }, [dispatch, isLogin]);
 
-  useEffect(getDate, [YM, isLogin?.USER_ID]);
+  useEffect(getDays, [YM, isLogin?.USER_ID]);
 
   return (
     <Container.Scroll>
@@ -177,9 +176,12 @@ export default function Days(): JSX.Element {
         monthFormat={'yyyy년 MM월'}
         enableSwipeMonths={false}
         markingType={'period'}
-        onDayPress={onDayPress}
-        markedDates={selectedDate}
-        onMonthChange={onMonthChange}
+        onDayPress={clickDate}
+        markedDates={{
+          [useDate(undefined, 'date')]: {textColor: '#dc6f97', today: true},
+          ...list,
+        }}
+        onMonthChange={changeMonth}
       />
 
       <Tip>

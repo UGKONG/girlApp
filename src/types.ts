@@ -114,6 +114,7 @@ export type Use = {
 };
 export type CalendarSelectDate = {
   [key: string]: {
+    id?: any;
     selected?: boolean;
     color?: string;
     startingDay?: boolean;
@@ -121,6 +122,7 @@ export type CalendarSelectDate = {
     textColor?: string;
     marked?: boolean;
     dotColor?: string;
+    today?: boolean;
   };
 };
 export type DateSaveForm = {
