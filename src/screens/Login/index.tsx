@@ -93,9 +93,9 @@ export default function 로그인({navigation}: Props): JSX.Element {
           text2: name + '님 반갑습니다.',
         });
       })
-      .catch(() => {
+      .catch(err => {
+        console.log(err);
         // 실패
-        navigation.navigate('home');
         dispatch('isLogin', null);
         AsyncStorage.removeItem('isLogin');
 
