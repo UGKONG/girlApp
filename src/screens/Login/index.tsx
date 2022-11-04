@@ -178,7 +178,7 @@ export default function 로그인({navigation}: Props): JSX.Element {
   return (
     <Container.View>
       <Contents>
-        <Title>LOGIN</Title>
+        <Title>로그인</Title>
         <IconWrap>
           {snsList?.map(item => (
             <Button key={item?.id} color={item?.color} onPress={item?.onPress}>
@@ -200,7 +200,7 @@ export default function 로그인({navigation}: Props): JSX.Element {
 }
 
 const Title = styled.Text`
-  font-size: 40px;
+  font-size: 36px;
   font-weight: 700;
   letter-spacing: 2px;
   color: #ee829f;

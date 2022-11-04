@@ -66,9 +66,13 @@ export default function 사용로그(): JSX.Element {
   return (
     <Container.Scroll>
       <TextPage.CommonText>
-        {`dono.LUNA는 적극적으로 당신의 건강을 생각하며 신뢰성 있는 LUNA day 산출을 위하여 당신의 도움이 필요합니다. 다름아닌, dono.LUNA의 사용 로그입니다. 혁신적인 생리통 경감과 자궁의 건강을 위해서는 당신의 생리 일정과 dono.LUNA 사용 패턴이 큰 단서가 됩니다. 
+        {`dono.LUNA를 사용한 날은 달력에 체크됩니다.
 
-고객님의 정보를 토대로 산출된 내용을 하기 달력에 표기 하오니 적극적인 dono.LUNA사용에 동참해 주시기 바랍니다.
+LUNA를 사용한 패턴과 당신의 변화를 느껴보세요.
+
+LUNA는 당신의 건강을 지켜드립니다.
+
+LUNA와 함께 새롭게 태어나세요.
         `}
       </TextPage.CommonText>
 

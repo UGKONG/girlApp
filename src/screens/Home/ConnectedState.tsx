@@ -22,7 +22,7 @@ export default function ConnectedState() {
     <Container>
       {data ? (
         <>
-          <Text>이름: LUNA-2022</Text>
+          <Text>이름: {data?.name ?? '-'}</Text>
           <Text>
             배터리:{' '}
             <Battery style={{color: battery?.color}}>
@@ -47,5 +47,6 @@ const Text = styled.Text`
   flex: 1;
   text-align: center;
   font-weight: 600;
+  color: #777777;
 `;
 const Battery = styled.Text``;

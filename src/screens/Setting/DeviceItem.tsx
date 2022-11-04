@@ -109,10 +109,7 @@ export default function 스캔된장비_아이템({
     Prompt(
       'LUNA',
       '내장비의 이름을 입력해주세요.',
-      [
-        {text: '취소'},
-        {text: '확인', onPress: addMyDevice, style: 'destructive'},
-      ],
+      [{text: '취소'}, {text: '확인', onPress: addMyDevice}],
       {
         cancelable: true,
         placeholder: 'MY LUNA DEVICE',

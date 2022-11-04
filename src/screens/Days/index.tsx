@@ -164,8 +164,13 @@ export default function Days(): JSX.Element {
   return (
     <Container.Scroll>
       <TextPage.CommonText>
-        {`dono.LUNA는 LUNA day를 챙겨 드리고 싶습니다. LUNA day는 바쁜 생활 속에서 자칫 잊을 수 있는 생리 전 이틀을 말합니다. 그 날이 바로 dono.LUNA를 꼭 만나야 하는 날이니까요. 당신의 LUNA day를 위하여 시작일과 끝나는 날을 달력에 메모해 주시면 dono.LUNA가 LUNA day 를 챙겨 드릴 것입니다.
-(자체 AI로 계산하므로 개인정보의 노출은 없습니다)
+        {`LUNA Day ?
+
+생리 시작 이틀 전 부터를 LUNA Day라고 합니다.
+
+LUNA Day는 dono.LUNA를 만나는 날입니다.
+
+생리 시작과 끝나는 날을 달력에 체크하면 LUNA Day 를 알려드립니다. (알람~)
 `}
       </TextPage.CommonText>
 

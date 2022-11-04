@@ -64,11 +64,8 @@ export default function 사이드메뉴({navigationRef}: Props): JSX.Element {
       {isLocalMenu && <Background style={{opacity: opacity}} />}
       {isMenu && <ClickBackground onPress={() => dispatch('isMenu', false)} />}
       <Container style={{transform: [{translateX: left}]}}>
-        <Description>
-          공지 : 생리통에 좋은 음식 뿐만 아니라 다양한 정보를 dono.LUNA 공식
-          블로그에 지속적으로 올리고 있습니다. 사용 방법 SNS 둘러보기를 활용해
-          보세요
-        </Description>
+        <Description>{`공지 : 생리통에 관한 다양한 정보를 dono.LUNA 공식블로그에 지속적으로 업데이트 합니다. 
+사용 방법 ‘S사NS용둘방러보법기’를 터치 하세요`}</Description>
         <Scroll>
           {menuList.current?.map(item => (
             <Menu key={item?.id} onPress={() => menuClick(item?.id)}>
