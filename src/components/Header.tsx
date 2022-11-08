@@ -11,6 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 type Props = {navigation: any};
 export default function 해더({navigation}: Props) {
   const dispatch = store(x => x?.setState);
+  const LANG = store(x => x?.lang);
   const isLogin = store<null | User>(x => x?.isLogin);
 
   const logout = (): void => {
@@ -19,8 +20,8 @@ export default function 해더({navigation}: Props) {
 
     Toast.show({
       type: 'success',
-      text1: '로그아웃 되었습니다.',
-      text2: '다음에 다시 만나요~',
+      text1: LANG === 'ko' ? '로그아웃 되었습니다.' : 'Logout Success',
+      text2: LANG === 'ko' ? '다음에 다시 만나요~' : 'bye~ bye~',
     });
   };
 
@@ -42,7 +43,15 @@ export default function 해더({navigation}: Props) {
         <Logo />
       </LogoContainer>
       <HeaderBtn width={80} onPress={isLogin ? logout : login}>
-        <LoginStatusText>{isLogin ? '로그아웃' : '로그인'}</LoginStatusText>
+        <LoginStatusText>
+          {isLogin
+            ? LANG === 'ko'
+              ? '로그아웃'
+              : 'Logout'
+            : LANG === 'ko'
+            ? '로그인'
+            : 'Login'}
+        </LoginStatusText>
         <MaterialIcons
           name={isLogin ? 'logout' : 'login'}
           color="#E39CB8"

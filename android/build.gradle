@@ -5,6 +5,10 @@ buildscript {
         compileSdkVersion = 31
         targetSdkVersion = 31
         kotlinVersion = '1.6.0'
+        kotlin_version = '1.6.0'
+        // kotlin_version = '1.5.20' 
+        // kotlinVersion = '1.5.20'
+
 
         if (System.properties['os.arch'] == "aarch64") {
             // For M1 Users we need to use the NDK 24 which added support for aarch64
@@ -19,7 +23,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:7.2.1")
+        classpath('com.android.tools.build:gradle:7.3.0')
         classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("de.undercouch:gradle-download-task:5.0.1")
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"

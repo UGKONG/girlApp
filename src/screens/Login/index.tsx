@@ -8,10 +8,6 @@ import store from '../../store';
 import Container from '../../components/Container';
 import Toast from 'react-native-toast-message';
 import useSnsList from './useSnsList';
-import type {
-  KakaoProfile,
-  KakaoProfileNoneAgreement,
-} from '@react-native-seoul/kakao-login';
 import {
   getProfile as getKakaoProfile,
   login,
@@ -50,6 +46,7 @@ type Props = {
 export default function 로그인({navigation}: Props): JSX.Element {
   const dispatch = store(x => x?.setState);
   const possibleDeviceName = store(x => x?.possibleDeviceName);
+  const LANG = store(x => x?.lang);
   const [isAutoLogin, setIsAutoLogin] = useState(true);
 
   // 최종 로그인
@@ -59,8 +56,12 @@ export default function 로그인({navigation}: Props): JSX.Element {
     if (id === '' || name === '') {
       Toast.show({
         type: 'error',
-        text1: snsPlatform + '계정으로 로그인을 시도하였습니다.',
-        text2: '로그인에 실패하였습니다.',
+        text1:
+          snsPlatform +
+          (LANG === 'ko'
+            ? '계정으로 로그인을 시도하였습니다.'
+            : 'Account Login Request.'),
+        text2: LANG === 'ko' ? '로그인에 실패하였습니다.' : 'Login Fail',
       });
       return;
     }
@@ -78,8 +79,12 @@ export default function 로그인({navigation}: Props): JSX.Element {
         if (!data?.result) {
           return Toast.show({
             type: 'error',
-            text1: snsPlatform + '계정으로 로그인을 시도하였습니다.',
-            text2: '로그인에 실패하였습니다.',
+            text1:
+              snsPlatform +
+              (LANG === 'ko'
+                ? '계정으로 로그인을 시도하였습니다.'
+                : 'Account Login Request.'),
+            text2: LANG === 'ko' ? '로그인에 실패하였습니다.' : 'Login Fail',
           });
         }
 
@@ -89,8 +94,12 @@ export default function 로그인({navigation}: Props): JSX.Element {
 
         Toast.show({
           type: 'success',
-          text1: snsPlatform + '계정으로 로그인하였습니다.',
-          text2: name + '님 반갑습니다.',
+          text1:
+            snsPlatform +
+            (LANG === 'ko'
+              ? '계정으로 로그인하였습니다.'
+              : 'Account Login Success'),
+          text2: name + (LANG === 'ko' ? '님 반갑습니다.' : ' Hello!!'),
         });
       })
       .catch(err => {
@@ -101,8 +110,12 @@ export default function 로그인({navigation}: Props): JSX.Element {
 
         Toast.show({
           type: 'error',
-          text1: snsPlatform + '계정으로 로그인을 시도하였습니다.',
-          text2: '로그인에 실패하였습니다.',
+          text1:
+            snsPlatform +
+            (LANG === 'ko'
+              ? '계정으로 로그인을 시도하였습니다.'
+              : 'Account Login Request.'),
+          text2: LANG === 'ko' ? '로그인에 실패하였습니다.' : 'Login Fail',
         });
       })
       .finally(() => {
@@ -112,23 +125,19 @@ export default function 로그인({navigation}: Props): JSX.Element {
 
   // 카카오 회원정보 조회
   const getKakaoData = (): void => {
-    getKakaoProfile().then(
-      (
-        value: KakaoProfile | KakaoProfileNoneAgreement,
-      ): void | PromiseLike<void> => {
-        const snsPlatform = 'KAKAO';
-        const id: string = value?.id ?? '';
-        const name: string = (value?.nickname as string) ?? '';
+    getKakaoProfile().then((value: any): void | PromiseLike<void> => {
+      const snsPlatform = 'KAKAO';
+      const id: string = value?.id ?? '';
+      const name: string = (value?.nickname as string) ?? '';
 
-        let data: SnsLoginData = {
-          appPlatform: possibleDeviceName,
-          snsPlatform,
-          id,
-          name,
-        };
-        submit(data);
-      },
-    );
+      let data: SnsLoginData = {
+        appPlatform: possibleDeviceName,
+        snsPlatform,
+        id,
+        name,
+      };
+      submit(data);
+    });
   };
 
   // 네이버 회원정보 조회
@@ -178,7 +187,7 @@ export default function 로그인({navigation}: Props): JSX.Element {
   return (
     <Container.View>
       <Contents>
-        <Title>로그인</Title>
+        <Title>{LANG === 'ko' ? '로그인' : 'LOGIN'}</Title>
         <IconWrap>
           {snsList?.map(item => (
             <Button key={item?.id} color={item?.color} onPress={item?.onPress}>
@@ -192,7 +201,9 @@ export default function 로그인({navigation}: Props): JSX.Element {
             color="#ee829f"
             onPress={autoLoginCheck}
           />
-          <AutoLoginText onPress={autoLoginCheck}>로그인유지</AutoLoginText>
+          <AutoLoginText onPress={autoLoginCheck}>
+            {LANG === 'ko' ? '로그인유지' : 'Keep Login'}
+          </AutoLoginText>
         </AutoLoginContainer>
       </Contents>
     </Container.View>

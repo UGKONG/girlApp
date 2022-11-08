@@ -3,8 +3,10 @@ import {Linking} from 'react-native';
 import styled from 'styled-components/native';
 import Container from '../../components/Container';
 import TextPage from '../../components/TextPage';
+import store from '../../store';
 
 export default function SNS둘러보기(): JSX.Element {
+  const LANG = store<'ko' | 'en'>(x => x?.lang);
   type SnsBtnList = {name: string; top: number; left: number; url: string};
   const snsBtnList = useRef<SnsBtnList[]>([
     {
@@ -42,13 +44,23 @@ export default function SNS둘러보기(): JSX.Element {
   return (
     <Container.Scroll>
       <TextPage.CommonText>
-        {`3년이 넘는 개발과 시험과정에서 dono.LUNA의 기술진 들은 생명이 잉태되는 자궁의 중요함과 신비로움에 대하여 경탄과 찬사가 이어졌습니다.
+        {LANG === 'ko'
+          ? `3년이 넘는 개발과 시험과정에서 dono.LUNA의 기술진 들은 생명이 잉태되는 자궁의 중요함과 신비로움에 대하여 경탄과 찬사가 이어졌습니다.
 
 즉, 자궁의 건강을 챙기는 것은 생리진통의 경감 만을 위하는 것이 아닙니다. 이는 곧 폐경의 지연과 더불어 피부미용에도 깊은 연관이 있을뿐더러, 더 나아가 인류 의 진화가 이어지는 곳 이기도 합니다.
 
 dono.LUNA 공식 블로그와 다양한 SNS채널에서는 자궁의 건강을 위한 다양한 정보를 지속적으로 업데이트 할 것입니다.
 
 dono.LUNA와 함께 심리적, 정신적 그리고 사회적 안녕을 맞이하면 평온하고 건강하게 삶의 질이 향상 됩니다.
+
+      `
+          : `In the process of development and testing for over 3 years, dono.LUNA's engineers continued to admire and admire the importance and mystery of the womb, where life is conceived.
+
+In other words, taking care of the health of the uterus is not just for alleviating menstrual pain. This is not only closely related to the delay of menopause and skin care, but also the place where human evolution continues.
+
+We continuously update various information about menstrual pain on the dono.LUNA official Blog.
+
+When you meet psychological, mental and social well-being with dono.LUNA, your quality of life will improve in a calm and healthy way.
 
       `}
       </TextPage.CommonText>

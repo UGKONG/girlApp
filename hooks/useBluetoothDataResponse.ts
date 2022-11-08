@@ -39,33 +39,41 @@ export default function () {
     }
 
     // 연결 시 첫 배터리 요청에 대한 응답이 왔을 때..
-    if (type === 'init') {
-      let strBattery: string = String(val);
+    if (type === 'init' || type === 'battery') {
+      let isPowerConnect: boolean = false;
       let battery: number = 0;
+      let numBattery: number = data?.value[0];
 
-      if (strBattery === 'a') {
-        battery = 100;
+      // 충전중
+      if (numBattery >= 0x10) {
+        isPowerConnect = true;
+        battery = (numBattery - 0x10) * 10;
       } else {
-        battery = Number(strBattery?.slice(1) + '0');
+        isPowerConnect = false;
+        battery = numBattery * 10;
       }
-      dispatch('activeDevice', {...activeDevice, battery: battery});
 
-      return bleWrite({
-        type: 'mode',
-        value: [0x70 + (remoteState?.mode ?? 1)],
-        isAuto: true,
+      dispatch('activeDevice', {
+        ...activeDevice,
+        battery,
+        isPowerConnect,
       });
-    } else if (type === 'battery') {
-      // 배터리에 대한 응답이 왔을 때..
-      let strBattery: string = String(val);
-      let battery: number = 0;
 
-      if (strBattery === 'a') {
-        battery = 100;
-      } else {
-        battery = Number(strBattery?.slice(1) + '0');
+      if (isPowerConnect) {
+        return bleWrite({
+          type: 'off',
+          value: [0x40],
+          isAuto: true,
+        });
       }
-      return dispatch('activeDevice', {...activeDevice, battery: battery});
+
+      if (type === 'init') {
+        return bleWrite({
+          type: 'mode',
+          value: [0x70 + (remoteState?.mode ?? 1)],
+          isAuto: true,
+        });
+      }
     } else if (type === 'mode') {
       // 모드에 대한 응답이 왔을 때..
       val = Number(String(val)?.slice(-1));

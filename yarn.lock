@@ -1302,10 +1302,10 @@
   resolved "https://registry.yarnpkg.com/@react-native-community/slider/-/slider-4.3.1.tgz#3d5a43b93ff225577097c767c73f5fca2452105f"
   integrity sha512-1UOKwABK+F2+Vzj7pI3UjRzWXrjI7yNECW/JNvfIXdpaS2/Vf/YH3XEszpG+8ZueEPSxNK2S271NGEWlheaExg==
 
-"@react-native-seoul/kakao-login@4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@react-native-seoul/kakao-login/-/kakao-login-4.0.0.tgz#9e1fb8ab710848d7bf81d02272ac9d59024fe9e4"
-  integrity sha512-eWkHhQc6FtaAYmscCJN+c4wEe6XIPOwLGZmfSChU9VYNi4JDX9P/XlfQppsu1njkZPRzDpu5KlOE3sIbLSfT6g==
+"@react-native-seoul/kakao-login@^5.2.3":
+  version "5.2.3"
+  resolved "https://registry.yarnpkg.com/@react-native-seoul/kakao-login/-/kakao-login-5.2.3.tgz#d5f51d9b544073ac189a43fc79e85063ad0f40d2"
+  integrity sha512-LMdzlw/SguL4lvbXUfRBDvMlDRCsZi4e98bufl8gEhc+ScEKq5iS62Yj/sjDj7S6sR8G8KJQ0yHRgKgkyf5i5g==
   dependencies:
     dooboolab-welcome "^1.3.2"
 

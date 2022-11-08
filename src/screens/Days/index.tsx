@@ -1,9 +1,8 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable curly */
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components/native';
-import {Calendar, CalendarList, DateData} from 'react-native-calendars';
+import {Calendar, DateData} from 'react-native-calendars';
 import Toast from 'react-native-toast-message';
 import Container from '../../components/Container';
 import TextPage from '../../components/TextPage';
@@ -28,6 +27,7 @@ export interface DaysType {
 export default function Days(): JSX.Element {
   const dispatch = store(x => x?.setState);
   const isLogin = store(x => x?.isLogin);
+  const LANG = store<'ko' | 'en'>(x => x?.lang);
   const [currentList, setCurrentList] = useState<DaysType[]>([]);
   const [YM, setYM] = useState<string>(
     useDate(undefined, 'date')?.replace('-', '')?.slice(0, 6),
@@ -77,7 +77,7 @@ export default function Days(): JSX.Element {
     useAxios
       .delete('/days', {params: form})
       .then(() => {
-        Toast.show({text1: '삭제되었습니다.'});
+        Toast.show({text1: LANG === 'ko' ? '삭제되었습니다.' : 'Deleted.'});
         getDays();
       })
       .catch(() => {});
@@ -91,17 +91,27 @@ export default function Days(): JSX.Element {
 
     if (find && !find?.today) {
       let optionBtn = {
-        text: '종료일 변경',
+        text: LANG === 'ko' ? '종료일 변경' : 'Change End Date',
         onPress: () => datePut(find?.id, null),
       };
       let buttons = [
-        {text: '취소'},
-        {text: '삭제', onPress: () => dateDelete(find?.id)},
+        {text: LANG === 'ko' ? '취소' : 'Cancel'},
+        {
+          text: LANG === 'ko' ? '삭제' : 'Delete',
+          onPress: () => dateDelete(find?.id),
+        },
       ];
       if (!find?.startingDay) buttons.unshift(optionBtn);
-      return Alert.alert('LUNA', '저장된 생리일을 제거하시겠습니까?', buttons, {
-        cancelable: true,
-      });
+      return Alert.alert(
+        'LUNA',
+        LANG === 'ko'
+          ? '저장된 생리일을 제거하시겠습니까?'
+          : 'Are you sure you want to delete it?',
+        buttons,
+        {
+          cancelable: true,
+        },
+      );
     }
 
     let keys: Array<string> = [];
@@ -140,7 +150,13 @@ export default function Days(): JSX.Element {
     }
 
     if (!nextValidate) {
-      return Toast.show({type: 'error', text1: '해당일에 지정할 수 없습니다.'});
+      return Toast.show({
+        type: 'error',
+        text1:
+          LANG === 'ko'
+            ? '해당일에 지정할 수 없습니다.'
+            : 'Cannot be selected date.',
+      });
     }
 
     // 시작일 추가
@@ -164,13 +180,22 @@ export default function Days(): JSX.Element {
   return (
     <Container.Scroll>
       <TextPage.CommonText>
-        {`LUNA Day ?
+        {LANG === 'ko'
+          ? `LUNA Day ?
 
 생리 시작 이틀 전 부터를 LUNA Day라고 합니다.
 
 LUNA Day는 dono.LUNA를 만나는 날입니다.
 
 생리 시작과 끝나는 날을 달력에 체크하면 LUNA Day 를 알려드립니다. (알람~)
+`
+          : `LUNA Day ?
+          
+The two days before menstruation is called LUNA Day.
+
+LUNA Day is the day you meet dono.LUNA.
+
+If you record the calendar for the start and end days of menstruation, you will be notified of LUNA Day. (Alarm~)
 `}
       </TextPage.CommonText>
 
@@ -191,8 +216,11 @@ LUNA Day는 dono.LUNA를 만나는 날입니다.
       />
 
       <Tip>
-        다음 LUNA day 는 10월 15일로 예상됩니다. 건강한 삶을 위하여 14일 부터는
-        잊지 말고 dono.LUNA 하세요
+        {LANG === 'ko'
+          ? `알림
+다음 LUNA day 는 10월 15일로 예상됩니다. 건강한 삶을 위하여 14일 부터는 잊지 말고 dono.LUNA 하세요`
+          : `Notice
+The next LUNA day is expected to be Octo- ber 15th. For a healthy life, do not forget to meet dono.LUNA from the 14th.`}
       </Tip>
     </Container.Scroll>
   );

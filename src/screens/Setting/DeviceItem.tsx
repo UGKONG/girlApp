@@ -26,6 +26,7 @@ export default function 스캔된장비_아이템({
   const dispatch = store(x => x?.setState);
   const activeDevice = store(x => x?.activeDevice);
   const myDeviceList = store(x => x?.myDeviceList);
+  const LANG = store(x => x?.lang);
   const serviceUUID: string = 'FE60';
   const notificationUUID: string = 'FE62';
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
@@ -68,7 +69,10 @@ export default function 스캔된장비_아이템({
       );
     } catch {
       setIsConnecting(false);
-      let failText = '연결에 실패하였습니다. 다시 시도해주세요.';
+      let failText =
+        LANG === 'ko'
+          ? '연결에 실패하였습니다. 루나를 3초간 만져주세요'
+          : 'Connection failed. Touch LUNA for 3 seconds';
       return Alert.alert('LUNA', failText, undefined, {cancelable: true});
     }
     setIsConnecting(false);
@@ -81,6 +85,9 @@ export default function 스캔된장비_아이템({
       isOn: false,
     });
     bleWrite({type: 'init', value: [0x30]});
+    let successText =
+      LANG === 'ko' ? '장비가 연결되었습니다.' : 'Connected Device.';
+    return Alert.alert('LUNA', successText, undefined, {cancelable: true});
   };
 
   // 장비 연결 해제
@@ -99,17 +106,25 @@ export default function 스캔된장비_아이템({
     disconnect();
     dispatch('myDeviceList', filter);
     await AsyncStorage.setItem('myDeviceList', JSON.stringify(filter));
-    Alert.alert('LUNA', '내장비가 제거되었습니다.', undefined, {
-      cancelable: true,
-    });
+    Alert.alert(
+      'LUNA',
+      LANG === 'ko' ? '내장비가 제거되었습니다.' : 'Deleted my device.',
+      undefined,
+      {
+        cancelable: true,
+      },
+    );
   };
 
   // 내장비 등록 옵션
   const addMyDeviceOption = (): void => {
     Prompt(
       'LUNA',
-      '내장비의 이름을 입력해주세요.',
-      [{text: '취소'}, {text: '확인', onPress: addMyDevice}],
+      LANG === 'ko' ? '내장비의 이름을 입력해주세요.' : 'Please enter a name',
+      [
+        {text: LANG === 'ko' ? '취소' : 'Cancel'},
+        {text: LANG === 'ko' ? '확인' : 'Yes', onPress: addMyDevice},
+      ],
       {
         cancelable: true,
         placeholder: 'MY LUNA DEVICE',
@@ -124,11 +139,16 @@ export default function 스캔된장비_아이템({
 
     Alert.alert(
       'LUNA',
-      '해당 장비를 연결 하시겠습니까?',
+      LANG === 'ko'
+        ? '해당 장비를 연결 하시겠습니까?'
+        : 'Do you want to connect?',
       [
-        {text: '내장비 등록', onPress: addMyDeviceOption},
-        {text: '취소'},
-        {text: '연결', onPress: connect},
+        {
+          text: LANG === 'ko' ? '내장비 등록' : 'Add my device',
+          onPress: addMyDeviceOption,
+        },
+        {text: LANG === 'ko' ? '취소' : 'Calcel'},
+        {text: LANG === 'ko' ? '연결' : 'Connection', onPress: connect},
       ],
       {cancelable: true},
     );
@@ -138,8 +158,13 @@ export default function 스캔된장비_아이템({
   const disconnectOption = (): void => {
     Alert.alert(
       'LUNA',
-      '현재 연결된 장비입니다. 연결을 해제하시겠습니까?',
-      [{text: '아니요'}, {text: '예', onPress: disconnect}],
+      LANG === 'ko'
+        ? '현재 연결된 장비입니다. 연결을 해제하시겠습니까?'
+        : 'Do you want to disconnect?',
+      [
+        {text: LANG === 'ko' ? '아니요' : 'No'},
+        {text: LANG === 'ko' ? '예' : 'Yes', onPress: disconnect},
+      ],
       {cancelable: true},
     );
   };
@@ -147,17 +172,27 @@ export default function 스캔된장비_아이템({
   // 장비 삭제 옵션
   const removeOption = (): void => {
     const title = isConnect
-      ? '연결을 해제하시겠습니까?'
-      : '해당 장비를 연결 하시겠습니까?';
-    const btnName = isConnect ? '연결 해제' : '연결';
+      ? LANG === 'ko'
+        ? '연결을 해제하시겠습니까?'
+        : 'Do you want to disconnect?'
+      : LANG === 'ko'
+      ? '해당 장비를 연결 하시겠습니까?'
+      : 'Do you want to connect?';
+    const btnName = isConnect
+      ? LANG === 'ko'
+        ? '연결 해제'
+        : 'Disconnect'
+      : LANG === 'ko'
+      ? '연결'
+      : 'Connect';
     const btnCallback = isConnect ? disconnect : connect;
 
     Alert.alert(
       'LUNA',
       title,
       [
-        {text: '내장비 제거', onPress: remove},
-        {text: '취소'},
+        {text: LANG === 'ko' ? '내장비 제거' : 'Delete', onPress: remove},
+        {text: LANG === 'ko' ? '취소' : 'Cancel'},
         {text: btnName, onPress: btnCallback},
       ],
       {
@@ -193,13 +228,15 @@ export default function 스캔된장비_아이템({
       {type !== 'connect' && isConnect && (
         <Option>
           <Icon name="link" />
-          <Status>연결중</Status>
+          <Status>{LANG === 'ko' ? '연결중' : 'Connect'}</Status>
         </Option>
       )}
 
       {isConnecting && (
         <Connecting>
-          <ConnectingText>연결 시도중</ConnectingText>
+          <ConnectingText>
+            {LANG === 'ko' ? '연결 시도중' : 'Connection'}
+          </ConnectingText>
         </Connecting>
       )}
     </Container>

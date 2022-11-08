@@ -6,18 +6,26 @@ import store from '../../store';
 
 export default function 내장비_리스트(): JSX.Element {
   const list = store<MyDevice[]>(x => x?.myDeviceList);
+  const LANG = store(x => x?.lang);
 
   const count = useMemo(() => list?.length ?? 0, [list]);
 
   return (
     <Container>
       <Header>
-        <Title>내장비</Title>
-        <Count>{count}개</Count>
+        <Title>{LANG === 'ko' ? '내장비' : 'My Device'}</Title>
+        <Count>
+          {count}
+          {LANG === 'ko' ? '개' : ' thing'}
+        </Count>
       </Header>
       <List>
         {list?.length === 0 ? (
-          <DescriptionText>등록된 내장비가 없습니다.</DescriptionText>
+          <DescriptionText>
+            {LANG === 'ko'
+              ? '등록된 내장비가 없습니다.'
+              : 'My Device is not registered.'}
+          </DescriptionText>
         ) : (
           list?.map(item => <DeviceItem type="my" key={item?.id} data={item} />)
         )}

@@ -15,6 +15,7 @@ type Props = {
 export default function () {
   const dispatch = store(x => x?.setState);
   const activeDevice = store(x => x?.activeDevice);
+  const LANG = store(x => x?.lang);
   const serviceUUID: string = 'FE60';
   const writeUUID: string = 'FE61';
   const [state, setState] = useState<null | Props>(null);
@@ -35,12 +36,15 @@ export default function () {
   const fail = (error: Error) => {
     Toast.show({
       type: 'error',
-      text1: '장비',
-      text2: '장비와 연결이 해제되었습니다.',
+      text1: LANG === 'ko' ? '장비' : 'Device',
+      text2:
+        LANG === 'ko' ? '장비와 연결이 해제되었습니다.' : 'Device disconnected',
     });
     console.log('Error', error);
     dispatch('activeDevice', null);
     dispatch('bluetoothDataRequest', null);
+    dispatch('isBluetoothReady', false);
+    dispatch('remoteState', null);
   };
 
   const write = (): void => {

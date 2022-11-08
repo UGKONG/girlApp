@@ -14,6 +14,7 @@ import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import type {ParamListBase} from '@react-navigation/native';
 import useAxios from '../../../hooks/useAxios';
 import Toast from 'react-native-toast-message';
+import Icon from 'react-native-vector-icons/Entypo';
 
 export const modeList: number[] = [1, 2, 3, 4, 5];
 export const powerList: number[] = [1, 2, 3, 4, 5];
@@ -28,6 +29,7 @@ export default function 홈({navigation}: Props): JSX.Element {
   const isLogin = store(x => x?.isLogin);
   const activeDevice = store(x => x?.activeDevice);
   const remoteState = store(x => x?.remoteState);
+  const LANG = store(x => x?.lang);
   const possibleDeviceName = store(x => x?.possibleDeviceName);
   const [time, setTime] = useState<null | number>(null);
 
@@ -43,7 +45,7 @@ export default function 홈({navigation}: Props): JSX.Element {
     () => [
       {
         id: 1,
-        name: '모드',
+        name: LANG === 'ko' ? '모드' : 'Mode',
         list: modeList,
         color: '#e46b8b',
         value: remoteState?.mode,
@@ -56,7 +58,7 @@ export default function 홈({navigation}: Props): JSX.Element {
       },
       {
         id: 2,
-        name: '에너지',
+        name: LANG === 'ko' ? '에너지' : 'Energy',
         list: powerList,
         color: '#e46b8b',
         value: remoteState?.power,
@@ -69,7 +71,7 @@ export default function 홈({navigation}: Props): JSX.Element {
       },
       {
         id: 3,
-        name: '타이머 (분)',
+        name: LANG === 'ko' ? '타이머 (분)' : 'Timer (min)',
         list: timerList,
         color: '#e46b8b',
         value: remoteState?.timer,
@@ -106,6 +108,17 @@ export default function 홈({navigation}: Props): JSX.Element {
     return {color: '#fff'};
   }, [time]);
 
+  // 충전중 여부
+  const isPowerConnect = useMemo<boolean>(() => {
+    if (!activeDevice) return false;
+    return activeDevice?.isPowerConnect;
+  }, [activeDevice?.isPowerConnect]);
+
+  // 언어
+  const isKo = useMemo<boolean>(() => {
+    return LANG === 'ko';
+  }, [LANG]);
+
   // 시작 정보 저장
   const createStartInfo = (): void => {
     const data = {
@@ -133,8 +146,11 @@ export default function 홈({navigation}: Props): JSX.Element {
 
     createStartInfo();
     Toast.show({
-      text1: '장비가 시작되었습니다.',
-      text2: '장비 진행중에는 타이머 설정이 불가능합니다.',
+      text1: LANG === 'ko' ? '장비가 시작되었습니다.' : 'Device started.',
+      text2:
+        LANG === 'ko'
+          ? '장비 진행중에는 타이머 설정이 불가능합니다.'
+          : 'Timer setting is not possible while the device is in progress.',
     });
   };
 
@@ -215,18 +231,22 @@ export default function 홈({navigation}: Props): JSX.Element {
             <Row>
               {isLogin ? (
                 <>
-                  <SubmitBtn isOn={isOn} onPress={startLuna}>
-                    <SubmitBtnText isOn={isOn}>
-                      {isOn ? '진행중' : '루나 시작'}
-                    </SubmitBtnText>
+                  <SubmitBtn isOn={isOn || isPowerConnect} onPress={startLuna}>
+                    <Icon
+                      name="controller-play"
+                      color={isOn || isPowerConnect ? '#959092' : '#e46b8b'}
+                      size={26}
+                    />
                   </SubmitBtn>
                   <SubmitBtn onPress={stopLuna}>
-                    <SubmitBtnText>정지</SubmitBtnText>
+                    <Icon name="controller-stop" color="#e46b8b" size={26} />
                   </SubmitBtn>
                 </>
               ) : (
                 <LoginDescription>
-                  로그인을 해야 사용이 가능합니다.
+                  {isKo
+                    ? '로그인을 해야 사용이 가능합니다.'
+                    : 'You must login to use it.'}
                 </LoginDescription>
               )}
             </Row>
@@ -237,14 +257,28 @@ export default function 홈({navigation}: Props): JSX.Element {
                 {isOn ? (
                   <>
                     <ProgressStatus style={timeColor}>
-                      {time ?? 0}초 후 자동 정지
+                      {isKo
+                        ? (time ?? 0) + '초 후 자동 정지'
+                        : 'Auto stop after ' + (time ?? 0) + ' seconds'}
                     </ProgressStatus>
                     <ProgressBarWrap>
                       <ProgressBar percent={timePercent} />
                     </ProgressBarWrap>
                   </>
                 ) : (
-                  <ProgressStatus>루나 시작이 필요합니다.</ProgressStatus>
+                  <ProgressStatus>
+                    {isPowerConnect &&
+                      isKo &&
+                      '충전중에는 사용이 불가능합니다.'}
+
+                    {!isPowerConnect && isKo && '루나 시작이 필요합니다.'}
+
+                    {isPowerConnect &&
+                      !isKo &&
+                      'It cannot be used while charging.'}
+
+                    {isPowerConnect && !isKo && 'LUNA needs to start.'}
+                  </ProgressStatus>
                 )}
               </ProgressBarContainer>
             ) : null}
@@ -253,7 +287,11 @@ export default function 홈({navigation}: Props): JSX.Element {
       ) : (
         <DeviceUndefined onPress={() => navigation.navigate('setting')}>
           <DeviceUndefinedBg />
-          <DeviceUndefinedText>장비를 연결해주세요.</DeviceUndefinedText>
+          <DeviceUndefinedText>
+            {LANG === 'ko'
+              ? '장비를 연결해주세요.'
+              : 'Please connect the device.'}
+          </DeviceUndefinedText>
         </DeviceUndefined>
       )}
     </Container.View>
@@ -277,12 +315,13 @@ export const Row = styled.View`
   padding: 0 16px;
 `;
 export const RowTitle = styled.Text`
-  width: 90px;
+  width: 100px;
   text-align: center;
   font-size: 16px;
   font-weight: 700;
   color: #da6e89;
   margin-right: 10px;
+  white-space: nowrap;
 `;
 export const SliderContainer = styled.View`
   position: relative;

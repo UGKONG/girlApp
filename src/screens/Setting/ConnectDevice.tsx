@@ -7,6 +7,7 @@ import store from '../../store';
 
 export default function 연결된장비(): JSX.Element {
   const activeDevice = store(x => x?.activeDevice);
+  const LANG = store(x => x?.lang);
 
   const data = useMemo<MyDevice>(() => {
     if (!activeDevice) return {id: '0', name: ''};
@@ -20,7 +21,7 @@ export default function 연결된장비(): JSX.Element {
   return (
     <Container>
       <Header>
-        <Title>연결된 장비</Title>
+        <Title>{LANG === 'ko' ? '연결된 장비' : 'Connected Device'}</Title>
       </Header>
       <DeviceItem data={data} type="connect" />
     </Container>

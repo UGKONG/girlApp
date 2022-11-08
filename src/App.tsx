@@ -8,7 +8,6 @@ import {
   Alert,
   NativeModules,
   NativeEventEmitter,
-  AppState,
   PermissionsAndroid,
 } from 'react-native';
 import {
@@ -41,6 +40,7 @@ export default function App(): JSX.Element {
   const isBluetoothReady = store(x => x?.isBluetoothReady);
   const possibleDeviceName = store(x => x?.possibleDeviceName);
   const isModal = store<boolean>(x => x?.isModal);
+  const LANG = store<'ko' | 'en'>(x => x?.lang);
 
   // 안드로이드 위치 권한 요청
   const androidLocationRequest = (fn: any): void => {
@@ -60,16 +60,13 @@ export default function App(): JSX.Element {
       } else {
         Alert.alert(
           possibleDeviceName,
-          '서비스 이용에 모든 권한이 필요합니다.',
+          LANG === 'ko'
+            ? '서비스 이용에 모든 권한이 필요합니다.'
+            : 'You need full access to the service.',
         );
         if (fn) setTimeout(() => fn(), 1000);
       }
     });
-
-    // request(PERMISSIONS.ANDROID.BLUETOOTH_SCAN).then(x => {
-    //   if (x === 'denied') fn();
-    //   console.log(x);
-    // });
   };
 
   // IOS 위치 권한 요청
@@ -100,10 +97,17 @@ export default function App(): JSX.Element {
       const name = rootState?.routes[rootState?.routes?.length - 1]?.name;
 
       if (name === 'home') {
-        Alert.alert('NUNA', '앱을 종료하시겠습니까?', [
-          {text: '취소'},
-          {text: '확인', onPress: () => BackHandler.exitApp()},
-        ]);
+        Alert.alert(
+          'NUNA',
+          LANG === 'ko' ? '앱을 종료하시겠습니까?' : 'Should I close the app?',
+          [
+            {text: LANG === 'ko' ? '취소' : 'Calcel'},
+            {
+              text: LANG === 'ko' ? '확인' : 'Yes',
+              onPress: () => BackHandler.exitApp(),
+            },
+          ],
+        );
         return true;
       } else {
         return false;
@@ -173,19 +177,18 @@ export default function App(): JSX.Element {
     let interval: NodeJS.Timer | undefined;
 
     clearInterval(interval);
-    interval = setInterval(getBattery, 25 * 1000);
+    interval = setInterval(getBattery, 20 * 1000);
 
     return (): void => clearInterval(interval);
   }, [activeDevice?.id, isBluetoothReady]);
 
   // 앱 종료 시 장비 정지 요청
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', () => {
-      let isExit = AppState?.currentState === 'background';
-      if (isExit) return bleWrite({type: 'exit', value: [0x99]});
-    });
-    return () => subscription.remove();
-  }, []);
+  useEffect(() => () => bleWrite({type: 'exit', value: [0x99]}), []);
+
+  useEffect(
+    () => console.log((LANG === 'ko' ? '한글' : '영어') + '버전 실행'),
+    [],
+  );
 
   return (
     <NavigationContainer ref={navigationRef}>

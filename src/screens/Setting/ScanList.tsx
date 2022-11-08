@@ -32,6 +32,7 @@ export default function 검색된장비_리스트({
 }: Props): JSX.Element {
   const possibleDeviceName = store(x => x?.possibleDeviceName);
   const myDeviceList = store(x => x?.myDeviceList);
+  const LANG = store(x => x?.lang);
   const [isScan, setIsScan] = useState<boolean>(false);
   const [list, setList] = useState<Device[]>([]);
 
@@ -48,19 +49,17 @@ export default function 검색된장비_리스트({
   // 검색 시작
   const startScan = async (): Promise<void> => {
     request(PERMISSIONS.ANDROID.BLUETOOTH_SCAN)
-      .then(result => {
-        // if (x !== 'granted') {
-        //   return Alert.alert(
-        //     possibleDeviceName,
-        //     '서비스 이용에 모든 권한이 필요합니다.',
-        //   );
-        // }
-
+      .then(() => {
         if (!state) {
           return Alert.alert(
             'LUNA',
-            '블루투스가 꺼져있습니다. 블루투스를 켜시겠습니까?',
-            [{text: '취소'}, {text: '켜기', onPress: bluetoothOn}],
+            LANG === 'ko'
+              ? '블루투스가 꺼져있습니다. 블루투스를 켜시겠습니까?'
+              : 'Bluetooth is off. Turn on Bluetooth?',
+            [
+              {text: LANG === 'ko' ? '취소' : 'Cancel'},
+              {text: LANG === 'ko' ? '켜기' : 'Turn on', onPress: bluetoothOn},
+            ],
             {cancelable: true},
           );
         }
@@ -77,7 +76,12 @@ export default function 검색된장비_리스트({
       })
       .catch(() => {
         setIsScan(false);
-        Alert.alert('LUNA', '검색에 실패하였습니다. 다시 시도해주세요.');
+        Alert.alert(
+          'LUNA',
+          LANG === 'ko'
+            ? '검색에 실패하였습니다. 다시 시도해주세요.'
+            : 'Search failed. Please try again.',
+        );
       });
   };
 
@@ -101,7 +105,7 @@ export default function 검색된장비_리스트({
 
   // 스캔중 텍스트
   const scanCountText = useMemo<string>(() => {
-    return (list?.length ?? 0) + '개';
+    return (list?.length ?? 0) + (LANG === 'ko' ? '개' : ' thing');
   }, [list]);
 
   // 스캔중 색상
@@ -135,17 +139,25 @@ export default function 검색된장비_리스트({
   return (
     <Container>
       <Header>
-        <Title>검색 장비 ({scanCountText})</Title>
+        <Title>
+          {LANG === 'ko' ? '검색 장비' : 'Search Device'} ({scanCountText})
+        </Title>
         <SearchBtn disabled={isScan} onPress={startScan}>
           <SearchIcon color={scanColor} />
           <SearchText style={{color: scanColor}}>
-            검색{isScan ? '중' : ''}
+            {LANG === 'ko'
+              ? '검색' + (isScan ? '중' : '')
+              : 'Scan' + (isScan ? 'ning' : '')}
           </SearchText>
         </SearchBtn>
       </Header>
       <List>
         {list?.length === 0 ? (
-          <DescriptionText>검색된 주변 장비가 없습니다.</DescriptionText>
+          <DescriptionText>
+            {LANG === 'ko'
+              ? '검색된 주변 장비가 없습니다.'
+              : 'No device detected.'}
+          </DescriptionText>
         ) : (
           list?.map(item => (
             <DeviceItem

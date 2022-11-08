@@ -1,4 +1,4 @@
-package com.girlapp.newarchitecture;
+package com.lunaEn.newarchitecture;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
@@ -19,9 +19,9 @@ import com.facebook.react.fabric.CoreComponentsRegistry;
 import com.facebook.react.fabric.FabricJSIModuleProvider;
 import com.facebook.react.fabric.ReactNativeConfig;
 import com.facebook.react.uimanager.ViewManagerRegistry;
-import com.girlapp.BuildConfig;
-import com.girlapp.newarchitecture.components.MainComponentsRegistry;
-import com.girlapp.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
+import com.lunaEn.BuildConfig;
+import com.lunaEn.newarchitecture.components.MainComponentsRegistry;
+import com.lunaEn.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
 import java.util.ArrayList;
 import java.util.List;
 

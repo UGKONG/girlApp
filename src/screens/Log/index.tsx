@@ -16,6 +16,7 @@ import LogItem from './LogItem';
 export default function 사용로그(): JSX.Element {
   const dispatch = store(x => x?.setState);
   const isLogin = store(x => x?.isLogin);
+  const LANG = store(x => x?.lang);
   const possibleDeviceName = store(x => x?.possibleDeviceName);
   const [list, setList] = useState<Use[]>([]);
   const [YM, setYM] = useState<string>(
@@ -66,18 +67,27 @@ export default function 사용로그(): JSX.Element {
   return (
     <Container.Scroll>
       <TextPage.CommonText>
-        {`dono.LUNA를 사용한 날은 달력에 체크됩니다.
+        {LANG === 'ko'
+          ? `dono.LUNA를 사용한 날은 달력에 체크됩니다.
 
 LUNA를 사용한 패턴과 당신의 변화를 느껴보세요.
 
 LUNA는 당신의 건강을 지켜드립니다.
 
 LUNA와 함께 새롭게 태어나세요.
+        `
+          : `Days used dono.LUNA are checked on the calendar.
+
+Feel the change your state according to used LUNA patterns.
+
+LUNA protects your health.
+
+Be born again with LUNA.
         `}
       </TextPage.CommonText>
 
       <CustomCalendar
-        monthFormat={'yyyy년 MM월'}
+        monthFormat={LANG === 'ko' ? 'yyyy년 MM월' : 'yyyy. MM.'}
         enableSwipeMonths={false}
         onMonthChange={onMonthChange}
         markedDates={markedDates}

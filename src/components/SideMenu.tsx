@@ -11,15 +11,16 @@ type Props = {
 export default function 사이드메뉴({navigationRef}: Props): JSX.Element {
   const dispatch = store(x => x?.setState);
   const isMenu = store<boolean>(x => x?.isMenu);
+  const LANG = store<'ko' | 'en'>(x => x?.lang);
   type MenuList = {id: string; name: string}[];
-  const menuList = useRef<MenuList>([
-    {id: 'home', name: 'dono.LUNA 시작'},
-    {id: 'question', name: '루나?'},
-    {id: 'how', name: '사용방법'},
-    {id: 'sns', name: 'SNS 둘러보기'},
-    {id: 'days', name: 'LUNA days'},
-    {id: 'log', name: '사용 로그'},
-    {id: 'setting', name: '설정'},
+  const [menuList] = useState<MenuList>([
+    {id: 'home', name: LANG === 'ko' ? 'dono.LUNA 시작' : 'dono.LUNA'},
+    {id: 'question', name: LANG === 'ko' ? '루나?' : 'LUNA?'},
+    {id: 'how', name: LANG === 'ko' ? '사용방법' : 'Usage'},
+    {id: 'sns', name: LANG === 'ko' ? 'SNS 둘러보기' : 'Social media'},
+    {id: 'days', name: LANG === 'ko' ? 'LUNA days' : 'LUNA days'},
+    {id: 'log', name: LANG === 'ko' ? '사용 로그' : 'Foot print'},
+    {id: 'setting', name: LANG === 'ko' ? '설정' : 'Set up'},
   ]);
   const [isLocalMenu, setIsLocalMenu] = useState(isMenu);
   const duration = useRef<number>(200);
@@ -64,10 +65,15 @@ export default function 사이드메뉴({navigationRef}: Props): JSX.Element {
       {isLocalMenu && <Background style={{opacity: opacity}} />}
       {isMenu && <ClickBackground onPress={() => dispatch('isMenu', false)} />}
       <Container style={{transform: [{translateX: left}]}}>
-        <Description>{`공지 : 생리통에 관한 다양한 정보를 dono.LUNA 공식블로그에 지속적으로 업데이트 합니다. 
-사용 방법 ‘S사NS용둘방러보법기’를 터치 하세요`}</Description>
+        <Description>
+          {LANG === 'ko'
+            ? `공지 : 생리통에 관한 다양한 정보를 dono.LUNA 공식블로그에 지속적으로 업데이트 합니다. 
+사용 방법 ‘S사NS용둘방러보법기’를 터치 하세요`
+            : `Notice : We continuously update various infor- mation about menstrual pain on the dono.LUNA official Blog.
+- Touch ‘Social media’`}
+        </Description>
         <Scroll>
-          {menuList.current?.map(item => (
+          {menuList?.map(item => (
             <Menu key={item?.id} onPress={() => menuClick(item?.id)}>
               <MenuText>{item?.name}</MenuText>
             </Menu>

@@ -3,12 +3,15 @@ import {Switch} from 'react-native';
 import styled from 'styled-components/native';
 import BluetoothSerial from 'react-native-bluetooth-serial-next';
 import type {SetState} from '../../types';
+import store from '../../store';
 
 type Props = {
   state: boolean;
   setState: SetState<boolean>;
 };
 export default function 블루투스_스위치({state, setState}: Props): JSX.Element {
+  const LANG = store(x => x?.lang);
+
   // 블루투스 켜기
   const bluetoothOn = useCallback((): void => {
     setState(true);
@@ -37,7 +40,7 @@ export default function 블루투스_스위치({state, setState}: Props): JSX.El
 
   return (
     <Container>
-      <Label>블루투스</Label>
+      <Label>{LANG === 'ko' ? '블루투스' : 'Bluetooth'}</Label>
       <Switch
         trackColor={{false: '#cacaca', true: '#E87EA6'}}
         thumbColor={state ? '#E87EA6' : '#cacaca'}

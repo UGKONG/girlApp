@@ -136,7 +136,7 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        applicationId "com.girlapp"
+        applicationId "com.lunaEn"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -219,6 +219,7 @@ android {
             keyPassword 'android'
         }
     }
+    namespace 'com.lunaEn'
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
@@ -230,6 +231,7 @@ android {
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
+
     }
 
     // applicationVariants are e.g. debug, release
