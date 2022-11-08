@@ -25,6 +25,14 @@ import type {ParamListBase} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Checkbox} from 'react-native-paper';
 import useAxios from '../../../hooks/useAxios';
+import {
+  LoginButton,
+  AccessToken,
+  LoginManager,
+  GraphRequest,
+  GraphRequestManager,
+  Profile,
+} from 'react-native-fbsdk-next';
 
 const iosKeys: NaverLoginPlatformKey = {
   kConsumerKey: 'JNaVcW1KLIzF72YKwfXB',
@@ -50,7 +58,7 @@ export default function 로그인({navigation}: Props): JSX.Element {
   const [isAutoLogin, setIsAutoLogin] = useState(true);
 
   // 최종 로그인
-  const submit = ({appPlatform, snsPlatform, id, name}: SnsLoginData): void => {
+  const submit = ({snsPlatform, id, name}: SnsLoginData): void => {
     if (!dispatch) return;
 
     if (id === '' || name === '') {
@@ -59,8 +67,8 @@ export default function 로그인({navigation}: Props): JSX.Element {
         text1:
           snsPlatform +
           (LANG === 'ko'
-            ? '계정으로 로그인을 시도하였습니다.'
-            : 'Account Login Request.'),
+            ? ' 계정으로 로그인을 시도하였습니다.'
+            : ' Account Login Request.'),
         text2: LANG === 'ko' ? '로그인에 실패하였습니다.' : 'Login Fail',
       });
       return;
@@ -178,11 +186,46 @@ export default function 로그인({navigation}: Props): JSX.Element {
       .catch(() => {});
   };
 
+  // 페이스북 로그인
+  const facebookLogin = (): void => {
+    LoginManager.logInWithPermissions([
+      'public_profile',
+      'email',
+      'user_friends',
+    ]).then(
+      (result: any) => {
+        if (result.isCancelled) return;
+        AccessToken.getCurrentAccessToken().then(data => {
+          if (!data) return;
+          let token = data?.accessToken?.toString();
+          if (!token) return;
+
+          Profile.getCurrentProfile().then(profile => {
+            if (!profile?.userID || !profile?.name) return;
+            submit({
+              appPlatform: possibleDeviceName,
+              snsPlatform: 'FACEBOOK',
+              id: profile?.userID,
+              name: profile?.name,
+            });
+          });
+        });
+      },
+      (error: Error) => {
+        console.log('Login fail with error: ' + error);
+      },
+    );
+  };
+
   // 자동 로그인 체크
   const autoLoginCheck = (): void => setIsAutoLogin(prev => !prev);
 
   // SNS 로그인 리스트
-  const snsList: Array<SnsLoginList> = useSnsList(kakaoLogin, naverLogin);
+  const snsList: Array<SnsLoginList> = useSnsList(
+    kakaoLogin,
+    naverLogin,
+    facebookLogin,
+  );
 
   return (
     <Container.View>
@@ -194,6 +237,40 @@ export default function 로그인({navigation}: Props): JSX.Element {
               <Icon img={item?.img} />
             </Button>
           ))}
+          {/* <LoginButton
+            readPermissions={['public_profile']}
+            onLoginFinished={(error, result) => {
+              if (error) {
+                console.log(error);
+                console.log('Login has error: ' + result?.error);
+              } else if (result.isCancelled) {
+                console.log('Login is cancelled.');
+              } else {
+                AccessToken.getCurrentAccessToken().then(data => {
+                  console.log(data?.accessToken.toString());
+                  const processRequest = new GraphRequest(
+                    '/me?fields=name,picture.type(large)',
+                    undefined,
+                    (error, result) => {
+                      if (error) {
+                        //Alert for the Error
+                        console.log('Error fetching data: ' + error.toString());
+                      } else {
+                        //response alert
+                        console.log(JSON.stringify(result));
+                      }
+                    },
+                  );
+                  // Start the graph request.
+                  new GraphRequestManager().addRequest(processRequest).start();
+                });
+              }
+            }}
+            onLogoutFinished={() => {
+              //Clear the state after logout
+              console.log('logout');
+            }}
+          /> */}
         </IconWrap>
         <AutoLoginContainer>
           <Checkbox

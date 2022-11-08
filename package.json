@@ -32,6 +32,7 @@
     "react-native-ble-manager": "^8.4.3",
     "react-native-bluetooth-serial-next": "^1.2.3",
     "react-native-calendars": "^1.1289.0",
+    "react-native-fbsdk-next": "^11.0.1",
     "react-native-paper": "^4.12.4",
     "react-native-permissions": "^3.6.1",
     "react-native-prompt-android": "^1.1.0",

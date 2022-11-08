@@ -1,7 +1,7 @@
 import type {Dispatch, SetStateAction} from 'react';
 import type {Peripheral} from 'react-native-ble-manager';
 
-export type SnsPlatform = 'KAKAO' | 'NAVER';
+export type SnsPlatform = 'KAKAO' | 'NAVER' | 'FACEBOOK';
 export type AppPlatform = 'LUNA' | 'PROSTA' | 'VENA';
 export type Device = Peripheral;
 export type User = {

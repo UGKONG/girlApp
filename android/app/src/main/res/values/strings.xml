@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">LUNA</string>
     <string name="kakao_app_key">e8a1a2641bc60e7a7dd92e87c9965ec5</string>
+
+    <string name="facebook_app_id">528283278801879</string>
+    <string name="fb_login_protocol_scheme">fb1234</string>
+    <string name="facebook_client_token">7e913c9045344bf30cf6680c24eef3bf</string>
 </resources>

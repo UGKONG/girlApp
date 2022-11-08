@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "270598405662",
+    "project_id": "luna-login",
+    "storage_bucket": "luna-login.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:270598405662:android:d71fc172de32fd2594b80f",
+        "android_client_info": {
+          "package_name": "com.lunaEn"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "270598405662-7hcmem7nujvm13a3fcl8ip6anfhe42c0.apps.googleusercontent.com",
+          "default_web_client_id": "516848922200-l6pfj0c8cfrp7mkhcmjjh02v66hmao4f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8g-aul-TxpE5-GKV0clnJolstkBcJnoc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "270598405662-7hcmem7nujvm13a3fcl8ip6anfhe42c0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
