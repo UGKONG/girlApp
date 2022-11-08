@@ -25,14 +25,7 @@ import type {ParamListBase} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Checkbox} from 'react-native-paper';
 import useAxios from '../../../hooks/useAxios';
-import {
-  LoginButton,
-  AccessToken,
-  LoginManager,
-  GraphRequest,
-  GraphRequestManager,
-  Profile,
-} from 'react-native-fbsdk-next';
+import {AccessToken, LoginManager, Profile} from 'react-native-fbsdk-next';
 
 const iosKeys: NaverLoginPlatformKey = {
   kConsumerKey: 'JNaVcW1KLIzF72YKwfXB',
@@ -90,8 +83,8 @@ export default function 로그인({navigation}: Props): JSX.Element {
             text1:
               snsPlatform +
               (LANG === 'ko'
-                ? '계정으로 로그인을 시도하였습니다.'
-                : 'Account Login Request.'),
+                ? ' 계정으로 로그인을 시도하였습니다.'
+                : ' Account Login Request.'),
             text2: LANG === 'ko' ? '로그인에 실패하였습니다.' : 'Login Fail',
           });
         }
@@ -105,8 +98,8 @@ export default function 로그인({navigation}: Props): JSX.Element {
           text1:
             snsPlatform +
             (LANG === 'ko'
-              ? '계정으로 로그인하였습니다.'
-              : 'Account Login Success'),
+              ? ' 계정으로 로그인하였습니다.'
+              : ' Account Login Success'),
           text2: name + (LANG === 'ko' ? '님 반갑습니다.' : ' Hello!!'),
         });
       })
@@ -121,8 +114,8 @@ export default function 로그인({navigation}: Props): JSX.Element {
           text1:
             snsPlatform +
             (LANG === 'ko'
-              ? '계정으로 로그인을 시도하였습니다.'
-              : 'Account Login Request.'),
+              ? ' 계정으로 로그인을 시도하였습니다.'
+              : ' Account Login Request.'),
           text2: LANG === 'ko' ? '로그인에 실패하였습니다.' : 'Login Fail',
         });
       })
