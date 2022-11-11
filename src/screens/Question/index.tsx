@@ -63,7 +63,11 @@ Pre-activation of the uterus separates the endometrium smoothly and neatly. Pros
       </TextPage.StrongText>
 
       <TextPage.Image
-        source={require('../../../assets/images/desc3.png')}
+        source={
+          LANG === 'ko'
+            ? require('../../../assets/images/desc3.png')
+            : require('../../../assets/images/desc3-en.png')
+        }
         width="100%"
         height="400px"
       />

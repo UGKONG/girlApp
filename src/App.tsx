@@ -183,7 +183,13 @@ export default function App(): JSX.Element {
   }, [activeDevice?.id, isBluetoothReady]);
 
   // 앱 종료 시 장비 정지 요청
-  useEffect(() => () => bleWrite({type: 'exit', value: [0x99]}), []);
+  useEffect(
+    () => () => {
+      bleWrite({type: 'exit', value: [0x99]});
+      console.log('꺼짐');
+    },
+    [],
+  );
 
   useEffect(
     () => console.log((LANG === 'ko' ? '한글' : '영어') + '버전 실행'),

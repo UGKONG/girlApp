@@ -51,7 +51,11 @@ Press the menu icon (hamburger button).
       </TextPage.CommonText>
 
       <TextPage.Image
-        source={require('../../../assets/images/how2.png')}
+        source={
+          LANG === 'ko'
+            ? require('../../../assets/images/how2.png')
+            : require('../../../assets/images/how2-en.png')
+        }
         width="100%"
         height="400px"
       />
@@ -67,7 +71,11 @@ Press ‘Set up’
       </TextPage.CommonText>
 
       <TextPage.Image
-        source={require('../../../assets/images/how3.png')}
+        source={
+          LANG === 'ko'
+            ? require('../../../assets/images/how3.png')
+            : require('../../../assets/images/how3-en.png')
+        }
         width="100%"
         height="400px"
       />
@@ -101,7 +109,11 @@ Press ‘Search’
       </TextPage.CommonText>
 
       <TextPage.Image
-        source={require('../../../assets/images/how5.png')}
+        source={
+          LANG === 'ko'
+            ? require('../../../assets/images/how5.png')
+            : require('../../../assets/images/how5-en.png')
+        }
         width="100%"
         height="600px"
       />
@@ -117,7 +129,11 @@ Check the found dono.LUNA and press
       </TextPage.CommonText>
 
       <TextPage.Image
-        source={require('../../../assets/images/how6.png')}
+        source={
+          LANG === 'ko'
+            ? require('../../../assets/images/how6.png')
+            : require('../../../assets/images/how6-en.png')
+        }
         width="100%"
         height="300px"
       />
@@ -136,7 +152,11 @@ If you click 'Connect', will be connected immediately.
       </TextPage.CommonText>
 
       <TextPage.Image
-        source={require('../../../assets/images/how7.png')}
+        source={
+          LANG === 'ko'
+            ? require('../../../assets/images/how7.png')
+            : require('../../../assets/images/how7-en.png')
+        }
         width="100%"
         height="250px"
       />
@@ -152,7 +172,11 @@ Enter the own LUNA name's
       </TextPage.CommonText>
 
       <TextPage.Image
-        source={require('../../../assets/images/how8.png')}
+        source={
+          LANG === 'ko'
+            ? require('../../../assets/images/how8.png')
+            : require('../../../assets/images/how8-en.png')
+        }
         width="100%"
         height="250px"
       />
@@ -173,7 +197,11 @@ Press 'Lovely LUNA' to connect dono.LUNA
       </TextPage.CommonText>
 
       <TextPage.Image
-        source={require('../../../assets/images/how9.png')}
+        source={
+          LANG === 'ko'
+            ? require('../../../assets/images/how9.png')
+            : require('../../../assets/images/how9-en.png')
+        }
         width="100%"
         height="250px"
       />
@@ -189,7 +217,11 @@ If remove it my device list, press ‘Remove device’ press ‘Connect’ to co
       </TextPage.CommonText>
 
       <TextPage.Image
-        source={require('../../../assets/images/how10.png')}
+        source={
+          LANG === 'ko'
+            ? require('../../../assets/images/how10.png')
+            : require('../../../assets/images/how10-en.png')
+        }
         width="100%"
         height="250px"
       />
@@ -205,7 +237,11 @@ Check the 'Lovely LUNA' displayed on the connected device And press 'dono.LUNA' 
       </TextPage.CommonText>
 
       <TextPage.Image
-        source={require('../../../assets/images/how11.png')}
+        source={
+          LANG === 'ko'
+            ? require('../../../assets/images/how11.png')
+            : require('../../../assets/images/how11-en.png')
+        }
         width="100%"
         height="300px"
       />
@@ -221,7 +257,11 @@ Press ‘▶︎’
       </TextPage.CommonText>
 
       <TextPage.Image
-        source={require('../../../assets/images/how12.png')}
+        source={
+          LANG === 'ko'
+            ? require('../../../assets/images/how12.png')
+            : require('../../../assets/images/how12-en.png')
+        }
         width="100%"
         height="800px"
       />
@@ -237,7 +277,11 @@ If you adjust the ENERGY and MODE according to the state of your body and mood, 
       </TextPage.CommonText>
 
       <TextPage.Image
-        source={require('../../../assets/images/how13.png')}
+        source={
+          LANG === 'ko'
+            ? require('../../../assets/images/how13.png')
+            : require('../../../assets/images/how13-en.png')
+        }
         width="100%"
         height="250px"
       />
