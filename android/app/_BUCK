@@ -35,12 +35,12 @@ android_library(
 
 android_build_config(
     name = "build_config",
-    package = "com.luna",
+    package = "com.lunaEn",
 )
 
 android_resource(
     name = "res",
-    package = "com.luna",
+    package = "com.lunaEn",
     res = "src/main/res",
 )
 

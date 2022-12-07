@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import styled from 'styled-components/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -33,6 +33,8 @@ export default function 해더({navigation}: Props) {
   const menuOpen = (): void => {
     dispatch('isMenu', true);
   };
+
+  useEffect(() => dispatch('navigation', navigation), [dispatch, navigation]);
 
   return (
     <Container>

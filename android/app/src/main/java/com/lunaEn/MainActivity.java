@@ -1,4 +1,4 @@
-package com.luna;
+package com.lunaEn;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;

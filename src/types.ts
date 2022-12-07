@@ -52,6 +52,7 @@ export type Store = {
   isModal: boolean;
   isMenu: boolean;
   isLogin: null | User;
+  navigation: any;
   loginRequired: boolean;
   myDeviceList: MyDevice[];
   possibleDeviceName: AppPlatform;

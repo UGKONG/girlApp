@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable curly */
 
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Platform} from 'react-native';
 import styled from 'styled-components/native';
 import store from '../../store';
@@ -20,8 +21,6 @@ import type {
   User,
   SnsLoginList,
 } from '../../types';
-import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import type {ParamListBase} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Checkbox} from 'react-native-paper';
 import useAxios from '../../../hooks/useAxios';
@@ -41,11 +40,9 @@ const androidKeys: NaverLoginPlatformKey = {
 
 const naverLoginPlatformKey = Platform.OS === 'android' ? androidKeys : iosKeys;
 
-type Props = {
-  navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
-};
-export default function 로그인({navigation}: Props): JSX.Element {
+export default function 로그인(): JSX.Element {
   const dispatch = store(x => x?.setState);
+  const navigation = store(x => x?.navigation);
   const possibleDeviceName = store(x => x?.possibleDeviceName);
   const LANG = store(x => x?.lang);
   const [isAutoLogin, setIsAutoLogin] = useState(true);
@@ -78,6 +75,7 @@ export default function 로그인({navigation}: Props): JSX.Element {
       .post('/user/login', userData)
       .then(({data}) => {
         if (!data?.result) {
+          navigation.navigate('home');
           return Toast.show({
             type: 'error',
             text1:
@@ -100,11 +98,13 @@ export default function 로그인({navigation}: Props): JSX.Element {
             (LANG === 'ko'
               ? ' 계정으로 로그인하였습니다.'
               : ' Account Login Success'),
-          text2: name + (LANG === 'ko' ? '님 반갑습니다.' : ' Hello!!'),
+          text2:
+            data?.current?.USER_NAME +
+            (LANG === 'ko' ? '님 반갑습니다.' : ' Hello!!'),
         });
       })
       .catch(err => {
-        console.log(err);
+        console.log('우리서버 로그인 실패', err);
         // 실패
         dispatch('isLogin', null);
         AsyncStorage.removeItem('isLogin');
@@ -118,6 +118,8 @@ export default function 로그인({navigation}: Props): JSX.Element {
               : ' Account Login Request.'),
           text2: LANG === 'ko' ? '로그인에 실패하였습니다.' : 'Login Fail',
         });
+
+        navigation.navigate('home');
       })
       .finally(() => {
         dispatch('isModal', false);
@@ -176,7 +178,17 @@ export default function 로그인({navigation}: Props): JSX.Element {
   const kakaoLogin = (): void => {
     login()
       .then(getKakaoData)
-      .catch(() => {});
+      .catch(() => {
+        console.log('KAKAO LOGIN FAIL');
+        Toast.show({
+          type: 'error',
+          text1:
+            LANG === 'ko'
+              ? '카카오 계정으로 로그인을 시도하였습니다.'
+              : 'Kakao Account Login Request.',
+          text2: LANG === 'ko' ? '로그인에 실패하였습니다.' : 'Login Fail',
+        });
+      });
   };
 
   // 페이스북 로그인
@@ -220,6 +232,16 @@ export default function 로그인({navigation}: Props): JSX.Element {
     facebookLogin,
   );
 
+  // 게스트로 자동 로그인
+  // useEffect(() => {
+  //   submit({
+  //     appPlatform: 'LUNA',
+  //     snsPlatform: 'KAKAO',
+  //     id: '2444825319',
+  //     name: '게스트',
+  //   });
+  // }, []);
+
   return (
     <Container.View>
       <Contents>
@@ -230,40 +252,6 @@ export default function 로그인({navigation}: Props): JSX.Element {
               <Icon img={item?.img} />
             </Button>
           ))}
-          {/* <LoginButton
-            readPermissions={['public_profile']}
-            onLoginFinished={(error, result) => {
-              if (error) {
-                console.log(error);
-                console.log('Login has error: ' + result?.error);
-              } else if (result.isCancelled) {
-                console.log('Login is cancelled.');
-              } else {
-                AccessToken.getCurrentAccessToken().then(data => {
-                  console.log(data?.accessToken.toString());
-                  const processRequest = new GraphRequest(
-                    '/me?fields=name,picture.type(large)',
-                    undefined,
-                    (error, result) => {
-                      if (error) {
-                        //Alert for the Error
-                        console.log('Error fetching data: ' + error.toString());
-                      } else {
-                        //response alert
-                        console.log(JSON.stringify(result));
-                      }
-                    },
-                  );
-                  // Start the graph request.
-                  new GraphRequestManager().addRequest(processRequest).start();
-                });
-              }
-            }}
-            onLogoutFinished={() => {
-              //Clear the state after logout
-              console.log('logout');
-            }}
-          /> */}
         </IconWrap>
         <AutoLoginContainer>
           <Checkbox

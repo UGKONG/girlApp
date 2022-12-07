@@ -29,7 +29,7 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        applicationId "com.luna"
+        applicationId "com.lunaEn"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -112,7 +112,7 @@ android {
             keyPassword 'android'
         }
     }
-    namespace 'com.luna'
+    namespace 'com.lunaEn'
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
